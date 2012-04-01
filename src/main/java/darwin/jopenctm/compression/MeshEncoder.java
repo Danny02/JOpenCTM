@@ -17,6 +17,8 @@ public interface MeshEncoder
 {
 
     public void encode(Mesh m, CtmOutputStream out) throws IOException;
-    public int getTag();
-}
 
+    public int getTag();
+
+    public int getFormatVersion();
+}

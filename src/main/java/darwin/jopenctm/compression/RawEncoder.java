@@ -7,7 +7,7 @@ package darwin.jopenctm.compression;
 import java.io.IOException;
 
 import darwin.jopenctm.*;
-import darwin.tools.annotations.ServiceProvider;
+import darwin.annotations.ServiceProvider;
 
 import static darwin.jopenctm.compression.MeshDecoder.*;
 
@@ -36,14 +36,14 @@ public class RawEncoder implements MeshEncoder
             writeArray(m.normals, out);
         }
 
-        for (AttributeData ad : m.getUVMaps()) {
+        for (AttributeData ad : m.texcoordinates) {
             out.writeInt(TEXC);
             out.writeString(ad.name);
             out.writeString(ad.materialName);
             writeArray(ad.values, out);
         }
 
-        for (AttributeData ad : m.getAttributs()) {
+        for (AttributeData ad : m.attributs) {
             out.writeInt(ATTR);
             out.writeString(ad.name);
             writeArray(ad.values, out);
@@ -60,6 +60,12 @@ public class RawEncoder implements MeshEncoder
     @Override
     public int getTag()
     {
-        return RawDecoder.RAW;
+        return RawDecoder.RAW_TAG;
+    }
+
+    @Override
+    public int getFormatVersion()
+    {
+        return RawDecoder.FORMAT_VERSION;
     }
 }

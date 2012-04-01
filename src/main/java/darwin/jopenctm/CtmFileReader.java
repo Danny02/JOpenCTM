@@ -17,8 +17,11 @@ import darwin.jopenctm.compression.MeshDecoder;
 public class CtmFileReader
 {
 
-    public static final int OCTM = 'O' | ('C' << 8) | ('T' << 16) | ('M' << 24);
-    public static final int FORMAT_VERSION = 5;
+    public static final int OCTM = getTagInt("OCTM");
+    public static final int CTM_ATTR_ELEMENT_COUNT = 4;
+    public static final int CTM_NORMAL_ELEMENT_COUNT = 3;
+    public static final int CTM_POSITION_ELEMENT_COUNT = 3;
+    public static final int CTM_UV_ELEMENT_COUNT = 2;
     private Mesh mesh;
     private String comment;
     private boolean decoded;
@@ -35,32 +38,35 @@ public class CtmFileReader
             throw new IOException("Bad format: the CTM file doesn't start with the OCTM tag!");
         }
         int formatVersion = in.readInt();
-        if (formatVersion != FORMAT_VERSION) {
-            throw new IOException("Unsupported format version(" + formatVersion + "). Only version " + FORMAT_VERSION + " supported!");
-        }
+
         int methodTag = in.readInt();
 
-        int vertexCount = in.readInt();
+        MeshInfo mi = new MeshInfo(in.readInt(),//vertex count
+                in.readInt(), //triangle count
+                in.readInt(), //uvmap count
+                in.readInt(), //attribute count
+                in.readInt());                  //flags
 
-        int triangleCount = in.readInt();
-
-        int UVMapCount = in.readInt();
-        int attribMapCount = in.readInt();
-        int flags = in.readInt();
         comment = in.readString();
 
         // Uncompress from stream
         Mesh m = null;
         ServiceLoader<MeshDecoder> services = ServiceLoader.load(MeshDecoder.class);
+        boolean tagSup = false, verSup = false;
         for (MeshDecoder md : services) {
-            if (md.getTag() == methodTag) {
-                m = md.decode(triangleCount, vertexCount, in);
-                break;
+            if (tagSup = md.getTag() == methodTag) {
+                if (verSup = md.isFormatSupported(formatVersion)) {
+                    m = md.decode(mi, in);
+                    break;
+                }
             }
         }
 
-        if (m == null) {
+        if (!tagSup) {
             throw new IOException("No sutible decoder found for Mesh of compression type: " + unpack(methodTag));
+
+        } else if (!verSup) {
+            throw new IOException("No sutible decoder found for Mesh of compression type: " + unpack(methodTag) + ", version " + formatVersion);
         }
 
         // Check mesh integrity
@@ -94,5 +100,12 @@ public class CtmFileReader
             decode();
         }
         return mesh;
+    }
+
+    public static int getTagInt(String tag)
+    {
+        char[] chars = tag.toCharArray();
+        assert chars.length == 4 : "A tag has to be constructed out of 4 characters!";
+        return chars[0] | (chars[1] << 8) | (chars[2] << 16) | (chars[3] << 24);
     }
 }

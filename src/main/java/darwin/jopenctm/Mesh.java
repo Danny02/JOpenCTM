@@ -4,9 +4,6 @@
  */
 package darwin.jopenctm;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  *
  * @author daniel
@@ -14,30 +11,20 @@ import java.util.List;
 public class Mesh
 {
 
-    public float[] vertices, normals;
-    public int[] indices;
+    public final float[] vertices, normals;
+    public final int[] indices;
     // Multiple sets of UV coordinate maps (optional)
-    private List<AttributeData> texcoordinates;
+    public final AttributeData[] texcoordinates;
     // Multiple sets of custom vertex attribute maps (optional)
-    private List<AttributeData> attributs;
+    public final AttributeData[] attributs;
 
-    public Mesh(float[] vertices, float[] normals, int[] indices, List<AttributeData> tc, List<AttributeData> att)
+    public Mesh(float[] vertices, float[] normals, int[] indices, AttributeData[] texcoordinates, AttributeData[] attributs)
     {
         this.vertices = vertices;
         this.normals = normals;
         this.indices = indices;
-        this.texcoordinates = tc != null ? tc : new LinkedList<AttributeData>();
-        this.attributs = att != null ? att : new LinkedList<AttributeData>();
-    }
-
-    public void addUVData(AttributeData data)
-    {
-        texcoordinates.add(data);
-    }
-
-    public void addAttrbute(AttributeData data)
-    {
-        attributs.add(data);
+        this.texcoordinates = texcoordinates;
+        this.attributs = attributs;
     }
 
     public int getVertexCount()
@@ -47,12 +34,12 @@ public class Mesh
 
     public int getUVCount()
     {
-        return texcoordinates.size();
+        return texcoordinates.length;
     }
 
     public int getAttrCount()
     {
-        return attributs.size();
+        return attributs.length;
     }
 
     public int getTriangleCount()
@@ -60,14 +47,9 @@ public class Mesh
         return indices.length / 3;
     }
 
-    public Iterable<AttributeData> getUVMaps()
+    public boolean hasNormals()
     {
-        return texcoordinates;
-    }
-
-    public Iterable<AttributeData> getAttributs()
-    {
-        return attributs;
+        return normals != null;
     }
 
     public float getAverageEdgeLength()
