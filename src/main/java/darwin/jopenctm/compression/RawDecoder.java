@@ -38,21 +38,27 @@ public class RawDecoder implements MeshDecoder
         AttributeData[] att = new AttributeData[minfo.getAttrCount()];
 
         checkTag(in.readInt(), INDX);
-        for (int i = 0; i < indices.length; ++i) {
-            indices[i] = in.readInt();
-        }
+        readIntArray(indices, in, minfo.getTriangleCount(), 3, false);
 
         checkTag(in.readInt(), VERT);
-        readFloat(vertices, in);
+        readFloatArray(vertices, in, vc * 3, 1);
 
-        checkTag(in.readInt(), NORM);
-        if (normals == null) {
-            //TODO bad format warning, the normal flag wasn't set
-            normals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];
+        int tag = in.readInt();
+        if (tag == NORM) {
+            if (normals == null) {
+                //TODO bad format warning, the normal flag wasn't set
+                normals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];
+            }
+            readFloatArray(normals, in, vc, 3);
+            tag = in.readInt();
         }
-        readFloat(normals, in);
 
-        for (int i = 0; i < tex.length; ++i) {
+        if (tex.length > 0) {
+            checkTag(tag, TEXC);
+            tex[0] = readUVData(vc, in);
+        }
+
+        for (int i = 1; i < tex.length; ++i) {
             checkTag(in.readInt(), TEXC);
             tex[i] = readUVData(vc, in);
         }
@@ -83,28 +89,35 @@ public class RawDecoder implements MeshDecoder
         return new String(chars);
     }
 
-    private static void readFloat(float[] array, CtmInputStream in) throws IOException
+    protected void readIntArray(int[] array, CtmInputStream in, int count, int size, boolean signed) throws IOException
+    {
+        for (int i = 0; i < array.length; i++) {
+            array[i] = in.readInt();
+        }
+    }
+
+    protected void readFloatArray(float[] array, CtmInputStream in, int count, int size) throws IOException
     {
         for (int i = 0; i < array.length; i++) {
             array[i] = in.readFloat();
         }
     }
 
-    private static AttributeData readUVData(int vertCount, CtmInputStream in) throws IOException
+    private AttributeData readUVData(int vertCount, CtmInputStream in) throws IOException
     {
         String name = in.readString();
         String matname = in.readString();
         float[] data = new float[vertCount * CTM_UV_ELEMENT_COUNT];
-        readFloat(data, in);
+        readFloatArray(data, in, vertCount, 2);
 
         return new AttributeData(name, matname, AttributeData.STANDART_UV_PRECISION, data);
     }
 
-    private static AttributeData readAttrData(int vertCount, CtmInputStream in) throws IOException
+    private AttributeData readAttrData(int vertCount, CtmInputStream in) throws IOException
     {
         String name = in.readString();
         float[] data = new float[vertCount * CTM_ATTR_ELEMENT_COUNT];
-        readFloat(data, in);
+        readFloatArray(data, in, vertCount, 4);
 
         return new AttributeData(name, null, AttributeData.STANDART_PRECISION, data);
     }

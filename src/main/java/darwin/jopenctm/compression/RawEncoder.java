@@ -6,8 +6,8 @@ package darwin.jopenctm.compression;
 
 import java.io.IOException;
 
-import darwin.jopenctm.*;
 import darwin.annotations.ServiceProvider;
+import darwin.jopenctm.*;
 
 import static darwin.jopenctm.compression.MeshDecoder.*;
 
@@ -22,35 +22,42 @@ public class RawEncoder implements MeshEncoder
     @Override
     public void encode(Mesh m, CtmOutputStream out) throws IOException
     {
+        int vc = m.getVertexCount();
+
         out.writeInt(INDX);
-        for (int i : m.indices) {
-            out.writeInt(i);
-        }
+        writeIndicies(m.indices, out);
 
         out.writeInt(VERT);
-        writeArray(m.vertices, out);
+        writeFloatArray(m.vertices, out, vc * 3, 1);
 
         // Write normals
         if (m.normals != null) {
             out.writeInt(NORM);
-            writeArray(m.normals, out);
+            writeFloatArray(m.normals, out, vc, 3);
         }
 
         for (AttributeData ad : m.texcoordinates) {
             out.writeInt(TEXC);
             out.writeString(ad.name);
             out.writeString(ad.materialName);
-            writeArray(ad.values, out);
+            writeFloatArray(ad.values, out, vc, 2);
         }
 
         for (AttributeData ad : m.attributs) {
             out.writeInt(ATTR);
             out.writeString(ad.name);
-            writeArray(ad.values, out);
+            writeFloatArray(ad.values, out, vc, 4);
         }
     }
 
-    private static void writeArray(float[] array, CtmOutputStream out) throws IOException
+    protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException
+    {
+        for (int i : indices) {
+            out.writeInt(i);
+        }
+    }
+
+    protected void writeFloatArray(float[] array, CtmOutputStream out, int count, int size) throws IOException
     {
         for (float v : array) {
             out.writeFloat(v);

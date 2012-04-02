@@ -36,7 +36,7 @@ public class CtmOutputStream extends DataOutputStream
         write(text.getBytes());
     }
 
-    void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
+    public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
     {
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
@@ -56,7 +56,7 @@ public class CtmOutputStream extends DataOutputStream
         writeCompressed(tmp);
     }
 
-    void writePackedFloats(float[] data, int count, int size) throws IOException
+    public void writePackedFloats(float[] data, int count, int size) throws IOException
     {
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];

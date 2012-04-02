@@ -32,13 +32,13 @@ public class CtmInputStream extends DataInputStream
         }
     }
 
-    public int[] readPackedInts(int count, int size, boolean signed) throws IOException
+    public int[] readPackedInts(int[] data, int count, int size, boolean signed) throws IOException
     {
+        assert data.length >= size * count;
         // Read packed data size from the stream
         readInt();
 
         byte[] tmp = new byte[count * size * 4];
-        int[] data = new int[count * size];
 
         LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
         lzin.read(tmp);
@@ -56,8 +56,9 @@ public class CtmInputStream extends DataInputStream
         return data;
     }
 
-    float[] readPackedFloats(int count, int size) throws IOException
+    public float[] readPackedFloats(float[] data, int count, int size) throws IOException
     {
+        assert data.length >= size * count;
         // Read packed data size from the stream
         readInt();
 
@@ -67,7 +68,6 @@ public class CtmInputStream extends DataInputStream
         LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
         lzin.read(tmp);
 
-        float[] data = new float[size * count];
         // Convert interleaved array to floats
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
