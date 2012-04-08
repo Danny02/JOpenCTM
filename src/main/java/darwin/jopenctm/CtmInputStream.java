@@ -5,8 +5,7 @@
 package darwin.jopenctm;
 
 import java.io.*;
-import lzma.sdk.lzma.Decoder;
-import lzma.streams.LzmaInputStream;
+import org.jlzmaio.LzmaInputStream;
 
 /**
  *
@@ -22,7 +21,7 @@ public class CtmInputStream extends DataInputStream
 
     public String readString() throws IOException
     {
-        int len = readInt();
+        int len = readLittleInt();
         if (len > 0) {
             byte[] values = new byte[len];
             read(values);
@@ -30,6 +29,31 @@ public class CtmInputStream extends DataInputStream
         } else {
             return "";
         }
+    }
+
+    /**
+    * reads a single Integer value, in little edian order
+    * @return
+    * @throws IOException
+    */
+    public int readLittleInt() throws IOException
+    {
+        int ch1 = read();
+        int ch2 = read();
+        int ch3 = read();
+        int ch4 = read();
+        if ((ch1 | ch2 | ch3 | ch4) < 0)
+            throw new EOFException();
+        return (ch1 + (ch2 << 8) + (ch3 << 16) + (ch4 << 24));
+    }
+
+    /**
+     * Reads floating point type stored in little endian (see readFloat() for big endian)
+     * @return float value translated from little endian
+     * @throws IOException if an IO error occurs
+     */
+    public final float readLittleFloat() throws IOException {
+        return Float.intBitsToFloat(readLittleInt());
     }
 
     public int[] readPackedInts(int[] data, int count, int size, boolean signed) throws IOException
@@ -40,7 +64,8 @@ public class CtmInputStream extends DataInputStream
 
         byte[] tmp = new byte[count * size * 4];
 
-        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
+//        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
+        LzmaInputStream lzin = new LzmaInputStream(in);
         lzin.read(tmp);
         // Convert interleaved array to integers
         for (int i = 0; i < count; ++i) {
@@ -65,7 +90,8 @@ public class CtmInputStream extends DataInputStream
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 
-        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
+//        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
+        LzmaInputStream lzin = new LzmaInputStream(in);
         lzin.read(tmp);
 
         // Convert interleaved array to floats
@@ -86,4 +112,5 @@ public class CtmInputStream extends DataInputStream
                 | (((int) data[x + y * width + 1 * width * height]) << 16)
                 | (((int) data[x + y * width]) << 24);
     }
+
 }

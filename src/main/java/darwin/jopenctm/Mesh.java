@@ -29,7 +29,7 @@ public class Mesh
 
     public int getVertexCount()
     {
-        return vertices.length;
+        return vertices.length / CtmFileReader.CTM_POSITION_ELEMENT_COUNT;
     }
 
     public int getUVCount()

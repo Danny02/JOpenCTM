@@ -30,27 +30,27 @@ public class RawDecoder implements MeshDecoder
         float[] vertices = new float[vc * CTM_POSITION_ELEMENT_COUNT];
         float[] normals = null;
         if ((minfo.getFlags() & HAS_NORMAL_BIT) > 0) {
-            normals = new float[vc];
+            normals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];
         }
         int[] indices = new int[minfo.getTriangleCount() * 3];
 
         AttributeData[] tex = new AttributeData[minfo.getUvMapCount()];
         AttributeData[] att = new AttributeData[minfo.getAttrCount()];
 
-        checkTag(in.readInt(), INDX);
+        checkTag(in.readLittleInt(), INDX);
         readIntArray(indices, in, minfo.getTriangleCount(), 3, false);
 
-        checkTag(in.readInt(), VERT);
+        checkTag(in.readLittleInt(), VERT);
         readFloatArray(vertices, in, vc * 3, 1);
 
-        int tag = in.readInt();
+        int tag = in.readLittleInt();
         if (tag == NORM) {
             if (normals == null) {
                 //TODO bad format warning, the normal flag wasn't set
                 normals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];
             }
             readFloatArray(normals, in, vc, 3);
-            tag = in.readInt();
+            tag = in.readLittleInt();
         }
 
         if (tex.length > 0) {
@@ -59,12 +59,12 @@ public class RawDecoder implements MeshDecoder
         }
 
         for (int i = 1; i < tex.length; ++i) {
-            checkTag(in.readInt(), TEXC);
+            checkTag(in.readLittleInt(), TEXC);
             tex[i] = readUVData(vc, in);
         }
 
         for (int i = 0; i < att.length; ++i) {
-            checkTag(in.readInt(), ATTR);
+            checkTag(in.readLittleInt(), ATTR);
             att[i] = readAttrData(vc, in);
         }
 
@@ -91,15 +91,17 @@ public class RawDecoder implements MeshDecoder
 
     protected void readIntArray(int[] array, CtmInputStream in, int count, int size, boolean signed) throws IOException
     {
+        assert array.length == count * size;
         for (int i = 0; i < array.length; i++) {
-            array[i] = in.readInt();
+            array[i] = in.readLittleInt();
         }
     }
 
     protected void readFloatArray(float[] array, CtmInputStream in, int count, int size) throws IOException
     {
+        assert array.length == count * size;
         for (int i = 0; i < array.length; i++) {
-            array[i] = in.readFloat();
+            array[i] = in.readLittleFloat();
         }
     }
 

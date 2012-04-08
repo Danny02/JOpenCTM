@@ -4,9 +4,11 @@
  */
 package darwin.jopenctm;
 
+import SevenZip.Compression.LZMA.Encoder;
 import java.io.*;
 import lzma.streams.LzmaOutputStream;
 import lzma.streams.LzmaOutputStream.Builder;
+
 
 /**
  *
@@ -32,8 +34,21 @@ public class CtmOutputStream extends DataOutputStream
         }
 
         // Write string length
-        writeInt(len);
+        writeLittleInt(len);
         write(text.getBytes());
+    }
+
+    public void writeLittleInt(int v) throws IOException
+    {
+        out.write(v & 0xFF);
+        out.write((v >>> 8) & 0xFF);
+        out.write((v >>> 16) & 0xFF);
+        out.write((v >>> 24) & 0xFF);
+    }
+
+    public void writeLittleFloat(float v) throws IOException
+    {
+        writeLittleInt(Float.floatToIntBits(v));
     }
 
     public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
@@ -74,10 +89,10 @@ public class CtmOutputStream extends DataOutputStream
 
     private void interleavedInsert(int value, byte[] data, int x, int y, int width, int height)
     {
-        data[x + y * width + 3 * width * height] = (byte) (value & 0x000000ff);
-        data[x + y * width + 2 * width * height] = (byte) ((value >> 8) & 0x000000ff);
-        data[x + y * width + width * height] = (byte) ((value >> 16) & 0x000000ff);
-        data[x + y * width] = (byte) ((value >> 24) & 0x000000ff);
+        data[x + y * width + 3 * width * height] = (byte) (value & 0xff);
+        data[x + y * width + 2 * width * height] = (byte) ((value >> 8) & 0xff);
+        data[x + y * width + width * height] = (byte) ((value >> 16) & 0xff);
+        data[x + y * width] = (byte) ((value >> 24) & 0xff);
     }
 
     private void writeCompressed(byte[] data) throws IOException
@@ -89,5 +104,9 @@ public class CtmOutputStream extends DataOutputStream
 
         LzmaOutputStream lzout = b.build();
         lzout.write(data);
+        lzout.flush();
+//        LzmaOutputStream lzout = new LzmaOutputStream(out);
+//        lzout.write(data);
+//        lzout.finish();
     }
 }

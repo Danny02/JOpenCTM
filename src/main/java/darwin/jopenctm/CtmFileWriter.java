@@ -42,15 +42,15 @@ public class CtmFileWriter
         }
 
         // Write header to stream
-        out.writeInt(OCTM);
-        out.writeInt(encoder.getFormatVersion());
-        out.writeInt(encoder.getTag());
+        out.writeLittleInt(OCTM);
+        out.writeLittleInt(encoder.getFormatVersion());
+        out.writeLittleInt(encoder.getTag());
 
-        out.writeInt(m.getVertexCount());
-        out.writeInt(m.getTriangleCount());
-        out.writeInt(m.getUVCount());
-        out.writeInt(m.getAttrCount());
-        out.writeInt(flags);
+        out.writeLittleInt(m.getVertexCount());
+        out.writeLittleInt(m.getTriangleCount());
+        out.writeLittleInt(m.getUVCount());
+        out.writeLittleInt(m.getAttrCount());
+        out.writeLittleInt(flags);
         out.writeString(comment);
 
         // Compress to stream

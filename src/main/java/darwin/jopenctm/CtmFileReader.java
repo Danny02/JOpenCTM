@@ -24,7 +24,6 @@ public class CtmFileReader
     public static final int CTM_UV_ELEMENT_COUNT = 2;
     private Mesh mesh;
     private String comment;
-    private boolean decoded;
     private final CtmInputStream in;
 
     public CtmFileReader(InputStream source)
@@ -32,20 +31,19 @@ public class CtmFileReader
         in = new CtmInputStream(source);
     }
 
-    public void decode() throws IOException
+    public Mesh decode() throws IOException
     {
-        if (in.readInt() != OCTM) {
+        if (in.readLittleInt() != OCTM) {
             throw new IOException("Bad format: the CTM file doesn't start with the OCTM tag!");
         }
-        int formatVersion = in.readInt();
+        int formatVersion = in.readLittleInt();
+        int methodTag = in.readLittleInt();
 
-        int methodTag = in.readInt();
-
-        MeshInfo mi = new MeshInfo(in.readInt(),//vertex count
-                in.readInt(), //triangle count
-                in.readInt(), //uvmap count
-                in.readInt(), //attribute count
-                in.readInt());                  //flags
+        MeshInfo mi = new MeshInfo(in.readLittleInt(),//vertex count
+                in.readLittleInt(), //triangle count
+                in.readLittleInt(), //uvmap count
+                in.readLittleInt(), //attribute count
+                in.readLittleInt());                  //flags
 
         comment = in.readString();
 
@@ -54,7 +52,8 @@ public class CtmFileReader
         ServiceLoader<MeshDecoder> services = ServiceLoader.load(MeshDecoder.class);
         boolean tagSup = false, verSup = false;
         for (MeshDecoder md : services) {
-            if (tagSup = md.getTag() == methodTag) {
+            tagSup |= md.getTag() == methodTag;
+            if (md.getTag() == methodTag) {
                 if (verSup = md.isFormatSupported(formatVersion)) {
                     m = md.decode(mi, in);
                     break;
@@ -73,7 +72,7 @@ public class CtmFileReader
         if (!m.checkIntegrity()) {
             throw new IOException("The integrity check of the mesh failed");
         }
-        decoded = true;
+        return m;
     }
 
     public static String unpack(int tag)
@@ -88,16 +87,17 @@ public class CtmFileReader
 
     public String getFileComment() throws IOException
     {
-        if (!decoded) {
-            decode();
+        if (mesh == null) {
+            mesh = decode();
         }
         return comment;
     }
 
     public Mesh getMesh() throws IOException
     {
-        if (!decoded) {
-            decode();
+        //TODO was wenn das decoden fehl schlaegt oder schonmal faehl geschlagen sit
+        if (mesh == null) {
+            mesh = decode();
         }
         return mesh;
     }
