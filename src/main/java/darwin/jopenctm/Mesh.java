@@ -11,6 +11,11 @@ package darwin.jopenctm;
 public class Mesh
 {
 
+    public static final int CTM_ATTR_ELEMENT_COUNT = 4;
+    public static final int CTM_NORMAL_ELEMENT_COUNT = 3;
+    public static final int CTM_POSITION_ELEMENT_COUNT = 3;
+    public static final int CTM_UV_ELEMENT_COUNT = 2;
+
     public final float[] vertices, normals;
     public final int[] indices;
     // Multiple sets of UV coordinate maps (optional)
@@ -29,7 +34,7 @@ public class Mesh
 
     public int getVertexCount()
     {
-        return vertices.length / CtmFileReader.CTM_POSITION_ELEMENT_COUNT;
+        return vertices.length / CTM_POSITION_ELEMENT_COUNT;
     }
 
     public int getUVCount()

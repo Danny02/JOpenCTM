@@ -45,7 +45,7 @@ public class MeshDecoderTest extends TestCase
             fail("couldn't load model Brunnen");
         ModelReader mr = new ObjModelReader();
 
-        ModelWriter mw = new CtmModelWriter(new MG1Encoder());
+        ModelWriter mw = new CtmModelWriter(new RawEncoder());
 
         File tmpCtm = File.createTempFile("testModel", ".ctm");
         try(OutputStream out = new FileOutputStream(tmpCtm);)
@@ -57,7 +57,7 @@ public class MeshDecoderTest extends TestCase
         System.out.println(tmpCtm.getAbsolutePath());
 
         mr = new CtmModelReader();
-        is = new FileInputStream(new File("/home/daniel/Desktop/brunnen.ctm"));
+        is = new FileInputStream(tmpCtm);
         mr.readModel(is);
     }
 

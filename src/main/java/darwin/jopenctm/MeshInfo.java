@@ -11,6 +11,8 @@ package darwin.jopenctm;
 public class MeshInfo
 {
 
+    public static final int HAS_NORMAL_BIT = 1;
+
     private final int vertexCount, triangleCount, uvMapCount, attrCount, flags;
 
     public MeshInfo(int vertexCount, int triangleCount, int uvMapCount, int attrCount, int flags)
@@ -42,8 +44,8 @@ public class MeshInfo
         return vertexCount;
     }
 
-    public int getFlags()
+    public boolean hasNormals()
     {
-        return flags;
+        return (flags & HAS_NORMAL_BIT) > 0;
     }
 }

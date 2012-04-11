@@ -18,10 +18,6 @@ public class CtmFileReader
 {
 
     public static final int OCTM = getTagInt("OCTM");
-    public static final int CTM_ATTR_ELEMENT_COUNT = 4;
-    public static final int CTM_NORMAL_ELEMENT_COUNT = 3;
-    public static final int CTM_POSITION_ELEMENT_COUNT = 3;
-    public static final int CTM_UV_ELEMENT_COUNT = 2;
     private Mesh mesh;
     private String comment;
     private final CtmInputStream in;
@@ -50,21 +46,14 @@ public class CtmFileReader
         // Uncompress from stream
         Mesh m = null;
         ServiceLoader<MeshDecoder> services = ServiceLoader.load(MeshDecoder.class);
-        boolean tagSup = false, verSup = false;
         for (MeshDecoder md : services) {
-            tagSup |= md.getTag() == methodTag;
-            if (md.getTag() == methodTag) {
-                if (verSup = md.isFormatSupported(formatVersion)) {
-                    m = md.decode(mi, in);
-                    break;
-                }
+            if (md.isFormatSupported(methodTag, formatVersion)) {
+                m = md.decode(mi, in);
+                break;
             }
         }
 
-        if (!tagSup) {
-            throw new IOException("No sutible decoder found for Mesh of compression type: " + unpack(methodTag));
-
-        } else if (!verSup) {
+        if (m == null) {
             throw new IOException("No sutible decoder found for Mesh of compression type: " + unpack(methodTag) + ", version " + formatVersion);
         }
 

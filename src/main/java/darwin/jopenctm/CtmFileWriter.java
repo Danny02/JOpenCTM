@@ -7,7 +7,6 @@ package darwin.jopenctm;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import darwin.jopenctm.compression.MeshDecoder;
 import darwin.jopenctm.compression.MeshEncoder;
 
 import static darwin.jopenctm.CtmFileReader.*;
@@ -38,7 +37,7 @@ public class CtmFileWriter
         // Determine flags
         int flags = 0;
         if (m.normals != null) {
-            flags |= MeshDecoder.HAS_NORMAL_BIT;
+            flags |= MeshInfo.HAS_NORMAL_BIT;
         }
 
         // Write header to stream

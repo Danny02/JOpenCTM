@@ -2,12 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression;
+package darwin.jopenctm.compression.mg1;
 
 import java.io.IOException;
 
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.*;
+import darwin.jopenctm.compression.MeshDecoder;
+import darwin.jopenctm.compression.RawDecoder;
 
 import static darwin.jopenctm.CtmFileReader.*;
 
@@ -30,24 +32,24 @@ public class MG1Decoder extends RawDecoder
     }
 
     @Override
-    public int getTag()
+    public boolean isFormatSupported(int tag, int version)
     {
-        return MG1_TAG;
+        return tag == MG1_TAG && version == FORMAT_VERSION;
     }
 
     @Override
-    protected void readFloatArray(float[] array, CtmInputStream in, int count, int size) throws IOException
+    protected float[] readFloatArray(CtmInputStream in, int count, int size) throws IOException
     {
-        in.readPackedFloats(array, count, size);
+        return in.readPackedFloats(count, size);
     }
 
     @Override
-    protected void readIntArray(int[] array, CtmInputStream in, int count, int size, boolean signed) throws IOException
+    protected int[] readIntArray(CtmInputStream in, int count, int size, boolean signed) throws IOException
     {
-        in.readPackedInts(array, count, size, signed);
+        return in.readPackedInts(count, size, signed);
     }
 
-    private void restoreIndices(int triangleCount, int[] indices)
+    public void restoreIndices(int triangleCount, int[] indices)
     {
         for (int i = 0; i < triangleCount; ++i) {
             // Step 1: Reverse derivative of the first triangle index

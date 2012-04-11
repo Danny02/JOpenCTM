@@ -22,12 +22,9 @@ public interface MeshDecoder
     public static final int NORM = getTagInt("NORM");
     public static final int TEXC = getTagInt("TEXC");
     public static final int ATTR = getTagInt("ATTR");
-    public static final int HAS_NORMAL_BIT = 1;
 
     public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException;
 
-    public int getTag();
-
-    public boolean isFormatSupported(int version);
+    public boolean isFormatSupported(int tag, int version);
 
 }

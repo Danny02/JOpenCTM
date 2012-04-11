@@ -2,17 +2,21 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression;
+package darwin.jopenctm.compression.mg1;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.CtmOutputStream;
+import darwin.jopenctm.compression.MeshEncoder;
+import darwin.jopenctm.compression.RawEncoder;
 
 /**
  *
  * @author daniel
  */
+@ServiceProvider(MeshEncoder.class)
 public class MG1Encoder extends RawEncoder
 {
 
@@ -25,7 +29,8 @@ public class MG1Encoder extends RawEncoder
     @Override
     protected void writeFloatArray(float[] array, CtmOutputStream out, int count, int size) throws IOException
     {
-        out.writePackedFloats(array, count, size);
+        out.writePackedFloats(array, count,
+                size);
     }
 
     @Override
@@ -38,37 +43,10 @@ public class MG1Encoder extends RawEncoder
         out.writePackedInts(tmp, indices.length / 3, 3, false);
     }
 
-    private static class Triangle implements Comparable<Triangle>
-    {
-
-        int[] elements = new int[3];
-
-        public Triangle(int[] source, int offset)
-        {
-            System.arraycopy(source, offset, elements, 0, 3);
-        }
-
-        public void copyBack(int[] dest, int offset)
-        {
-            System.arraycopy(elements, 0, dest, offset, 3);
-        }
-
-        @Override
-        public int compareTo(Triangle o)
-        {
-            if (elements[0] != o.elements[0]) {
-                return elements[0] - o.elements[0];
-            } else if (elements[1] != o.elements[1]) {
-                return elements[1] - o.elements[1];
-            }
-            return elements[2] - o.elements[2];
-        }
-    }
-
     /**
      * Re-arrange all triangles for optimal compression.
      */
-    private void rearrangeTriangles(int[] indices)
+    public void rearrangeTriangles(int[] indices)
     {
         assert indices.length % 3 == 0;
         // Step 1: Make sure that the first index of each triangle is the smallest
@@ -105,7 +83,7 @@ public class MG1Encoder extends RawEncoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private void makeIndexDeltas(int[] indices)
+    public void makeIndexDeltas(int[] indices)
     {
         assert indices.length % 3 == 0;
 

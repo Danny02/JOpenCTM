@@ -1,0 +1,231 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package darwin.jopenctm.compression.mg2;
+
+import java.io.IOException;
+
+import darwin.annotations.ServiceProvider;
+import darwin.jopenctm.*;
+import darwin.jopenctm.compression.MeshDecoder;
+import darwin.jopenctm.compression.RawDecoder;
+import darwin.jopenctm.compression.mg1.MG1Decoder;
+
+import static darwin.jopenctm.compression.mg2.CommonAlgorithms.*;
+import static darwin.jopenctm.Mesh.*;
+import static java.lang.Math.*;
+
+/**
+ *
+ * @author daniel
+ */
+@ServiceProvider(MeshDecoder.class)
+public class MG2Decoder extends MG1Decoder
+{
+
+    public static final int MG2_Tag = CtmFileReader.getTagInt("MG2\0");
+    public static final int MG2_HEADER_TAG = CtmFileReader.getTagInt("MG2H");
+    public static final int GIDX = CtmFileReader.getTagInt("GIDX");
+
+    @Override
+    public boolean isFormatSupported(int tag, int version)
+    {
+        return tag == MG2_Tag && version == RawDecoder.FORMAT_VERSION;
+    }
+
+    /**
+     * Calculate inverse derivatives of the vertex attributes.
+     */
+    private float[] restoreAttribs(float precision, int[] intAttribs)
+    {
+        int ae = CTM_ATTR_ELEMENT_COUNT;
+        int vc = intAttribs.length / ae;
+        float[] values = new float[intAttribs.length];
+        int[] prev = new int[ae];
+        for (int i = 0; i < vc; ++i) {
+            // Calculate inverse delta, and convert to floating point
+            for (int j = 0; j < ae; ++j) {
+                int value = intAttribs[i * ae + j] + prev[j];
+                values[i * ae + j] = value * precision;
+                prev[j] = value;
+            }
+        }
+        return values;
+    }
+
+    /**
+     * Calculate inverse derivatives of the UV coordinates.
+     */
+    private float[] restoreUVCoords(float precision, int[] intUVCoords)
+    {
+        int vc = intUVCoords.length / CTM_UV_ELEMENT_COUNT;
+        float[] values = new float[intUVCoords.length];
+        int prevU = 0, prevV = 0;
+        for (int i = 0; i < vc; ++i) {
+            // Calculate inverse delta
+            int u = intUVCoords[i * CTM_UV_ELEMENT_COUNT] + prevU;
+            int v = intUVCoords[i * CTM_UV_ELEMENT_COUNT + 1] + prevV;
+
+            // Convert to floating point
+            values[i * CTM_UV_ELEMENT_COUNT] = u * precision;
+            values[i * CTM_UV_ELEMENT_COUNT + 1] = v * precision;
+
+            prevU = u;
+            prevV = v;
+        }
+        return values;
+    }
+
+    /**
+     * Convert the normals back to cartesian coordinates.
+     */
+    private float[] restoreNormals(int[] intNormals, float[] vertices, int[] indices, float normalPrecision)
+    {
+
+        // Calculate smooth normals (nominal normals)
+        float[] smoothNormals = calcSmoothNormals(vertices, indices);
+        float[] normals = new float[vertices.length];
+
+        int vc = vertices.length / CTM_POSITION_ELEMENT_COUNT;
+        int ne = CTM_NORMAL_ELEMENT_COUNT;
+
+        for (int i = 0; i < vc; ++i) {
+            // Get the normal magnitude from the first of the three normal elements
+            float magn = intNormals[i * ne] * normalPrecision;
+
+            // Get phi and theta (spherical coordinates, relative to the smooth normal).
+            double thetaScale, theta;
+            int intPhi = intNormals[i * ne + 1];
+            double phi = intPhi * (0.5 * PI) * normalPrecision;
+            if (intPhi == 0) {
+                thetaScale = 0.0f;
+            } else if (intPhi <= 4) {
+                thetaScale = PI / 2.0f;
+            } else {
+                thetaScale = (2.0f * PI) / intPhi;
+            }
+            theta = intNormals[i * ne + 2] * thetaScale - PI;
+
+            // Convert the normal from the angular representation (phi, theta) back to
+            // cartesian coordinates
+            double[] n2 = new double[3];
+            n2[0] = sin(phi) * cos(theta);
+            n2[1] = sin(phi) * sin(theta);
+            n2[2] = cos(phi);
+            float[] basisAxes = makeNormalCoordSys(smoothNormals, i * ne);
+            double[] n = new double[3];
+            for (int j = 0; j < 3; ++j) {
+                n[j] = basisAxes[j] * n2[0]
+                        + basisAxes[3 + j] * n2[1]
+                        + basisAxes[6 + j] * n2[2];
+            }
+
+            // Apply normal magnitude, and output to the normals array
+            for (int j = 0; j < 3; ++j) {
+                normals[i * ne + j] = (float) (n[j] * magn);
+            }
+        }
+
+        return normals;
+    }
+
+    @Override
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException
+    {
+        int vc = minfo.getVertexCount();
+
+        checkTag(in.readLittleInt(), MG2_HEADER_TAG);
+        float vertexPrecision = in.readLittleFloat();
+        float normalPrecision = in.readLittleFloat();
+
+        Grid grid = new Grid();
+        grid.readFromStream(in);
+
+        float[] vertices = readVertices(in, grid, vc, vertexPrecision);
+        int[] indices = readIndices(in, minfo.getTriangleCount(), vc);
+        float[] normals = null;
+        if (minfo.hasNormals()) {
+            normals = readNormals(in, vertices, indices, normalPrecision, vc);
+        }
+
+        AttributeData[] uvData = new AttributeData[minfo.getUvMapCount()];
+        for (int i = 0; i < uvData.length; i++) {
+            uvData[i] = readUvData(in, vc);
+        }
+
+        AttributeData[] attributs = new AttributeData[minfo.getAttrCount()];
+        for (int i = 0; i < attributs.length; i++) {
+            attributs[i] = readAttribute(in, vc);
+        }
+
+        return new Mesh(vertices, normals, indices, uvData, attributs);
+    }
+
+    private float[] readVertices(CtmInputStream in, Grid grid, int vcount, float precision) throws IOException
+    {
+        checkTag(in.readLittleInt(), VERT);
+        int[] intVertices = in.readPackedInts(vcount, CTM_POSITION_ELEMENT_COUNT, false);
+
+        checkTag(in.readLittleInt(), GIDX);
+        int[] gridIndices = in.readPackedInts(vcount, 1, false);
+        for (int i = 1; i < vcount; i++) {
+            gridIndices[i] += gridIndices[i - 1];
+        }
+
+        return restoreVertices(intVertices, gridIndices, grid, precision);
+    }
+
+    private int[] readIndices(CtmInputStream in, int triCount, int vcount) throws IOException
+    {
+        checkTag(in.readLittleInt(), INDX);
+        int[] indices = in.readPackedInts(triCount, 3, false);
+        restoreIndices(triCount, indices);
+        for (int i : indices) {
+            if (i > vcount) {
+                throw new IOException("Invalid Mesh");
+            }
+        }
+        return indices;
+    }
+
+    private float[] readNormals(CtmInputStream in, float[] vertices, int[] indices,
+            float normalPrecision, int vcount) throws IOException
+    {
+        checkTag(in.readLittleInt(), NORM);
+        int[] intNormals = in.readPackedInts(vcount, CTM_NORMAL_ELEMENT_COUNT, false);
+        return restoreNormals(intNormals, vertices, indices, normalPrecision);
+    }
+
+    private AttributeData readUvData(CtmInputStream in, int vcount) throws IOException
+    {
+        checkTag(in.readLittleInt(), TEXC);
+        String name = in.readString();
+        String material = in.readString();
+        float precision = in.readLittleFloat();
+        if (precision <= 0f) {
+            throw new IOException("Bad Format");
+        }
+
+        int[] intCoords = in.readPackedInts(vcount, CTM_UV_ELEMENT_COUNT, true);
+        float[] data = restoreUVCoords(precision, intCoords);
+
+        return new AttributeData(name, material, precision, data);
+    }
+
+    private AttributeData readAttribute(CtmInputStream in, int vc) throws IOException
+    {
+        checkTag(in.readLittleInt(), ATTR);
+
+        String name = in.readString();
+        float precision = in.readLittleFloat();
+        if (precision <= 0f) {
+            throw new IOException("Bad Format");
+        }
+
+        int[] intData = in.readPackedInts(vc, CTM_ATTR_ELEMENT_COUNT, true);
+        float[] data = restoreAttribs(precision, intData);
+
+        return new AttributeData(name, null, precision, data);
+    }
+}

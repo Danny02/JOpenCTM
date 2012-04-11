@@ -5,7 +5,6 @@
 package darwin.jopenctm;
 
 import java.io.*;
-import org.jlzmaio.LzmaInputStream;
 
 /**
  *
@@ -32,41 +31,39 @@ public class CtmInputStream extends DataInputStream
     }
 
     /**
-    * reads a single Integer value, in little edian order
-    * @return
-    * @throws IOException
-    */
+     * reads a single Integer value, in little edian order
+     * <p/>
+     * @return < p/> @throws IOException
+     */
     public int readLittleInt() throws IOException
     {
         int ch1 = read();
         int ch2 = read();
         int ch3 = read();
         int ch4 = read();
-        if ((ch1 | ch2 | ch3 | ch4) < 0)
+        if ((ch1 | ch2 | ch3 | ch4) < 0) {
             throw new EOFException();
+        }
         return (ch1 + (ch2 << 8) + (ch3 << 16) + (ch4 << 24));
     }
 
     /**
-     * Reads floating point type stored in little endian (see readFloat() for big endian)
+     * Reads floating point type stored in little endian (see readFloat() for
+     * big endian)
+     * <p/>
      * @return float value translated from little endian
+     * <p/>
      * @throws IOException if an IO error occurs
      */
-    public final float readLittleFloat() throws IOException {
+    public final float readLittleFloat() throws IOException
+    {
         return Float.intBitsToFloat(readLittleInt());
     }
 
-    public int[] readPackedInts(int[] data, int count, int size, boolean signed) throws IOException
+    public int[] readPackedInts(int count, int size, boolean signed) throws IOException
     {
-        assert data.length >= size * count;
-        // Read packed data size from the stream
-        readInt();
-
-        byte[] tmp = new byte[count * size * 4];
-
-//        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
-        LzmaInputStream lzin = new LzmaInputStream(in);
-        lzin.read(tmp);
+        int[] data = new int[count * size];
+        byte[] tmp = readPackedData(count * size * 4);
         // Convert interleaved array to integers
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
@@ -81,19 +78,10 @@ public class CtmInputStream extends DataInputStream
         return data;
     }
 
-    public float[] readPackedFloats(float[] data, int count, int size) throws IOException
+    public float[] readPackedFloats(int count, int size) throws IOException
     {
-        assert data.length >= size * count;
-        // Read packed data size from the stream
-        readInt();
-
-        // Allocate memory for interleaved array
-        byte[] tmp = new byte[count * size * 4];
-
-//        LzmaInputStream lzin = new LzmaInputStream(this, new Decoder());
-        LzmaInputStream lzin = new LzmaInputStream(in);
-        lzin.read(tmp);
-
+        float[] data = new float[count * size];
+        byte[] tmp = readPackedData(count * size * 4);
         // Convert interleaved array to floats
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
@@ -105,6 +93,16 @@ public class CtmInputStream extends DataInputStream
         return data;
     }
 
+    private byte[] readPackedData(int size) throws IOException
+    {
+        byte[] packed = new byte[readLittleInt() + 5];//lzma properties are 5 bytes big
+        read(packed);
+
+        byte[] tmp = new byte[size]; //a Float is 4 bytes
+        new PackedInputStream(packed).read(tmp);
+        return tmp;
+    }
+
     private int interleavedRetrive(byte[] data, int x, int y, int width, int height)
     {
         return (int) data[x + y * width + 3 * width * height]
@@ -112,5 +110,4 @@ public class CtmInputStream extends DataInputStream
                 | (((int) data[x + y * width + 1 * width * height]) << 16)
                 | (((int) data[x + y * width]) << 24);
     }
-
 }
