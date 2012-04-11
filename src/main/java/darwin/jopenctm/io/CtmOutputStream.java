@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm;
+package darwin.jopenctm.io;
 
 import java.io.*;
 import lzma.sdk.lzma.Encoder;
@@ -60,6 +60,8 @@ public class CtmOutputStream extends DataOutputStream
 
     public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
     {
+        assert data.length >= count * size: "The data to be written is smaller"
+                + " as stated by other parameters. Needed: "+(count*size)+" Provided: "+data.length;
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 
@@ -80,6 +82,8 @@ public class CtmOutputStream extends DataOutputStream
 
     public void writePackedFloats(float[] data, int count, int size) throws IOException
     {
+        assert data.length >= count * size: "The data to be written is smaller"
+                + " as stated by other parameters. Needed: "+(count*size)+" Provided: "+data.length;
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 

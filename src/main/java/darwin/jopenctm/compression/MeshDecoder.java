@@ -6,9 +6,13 @@ package darwin.jopenctm.compression;
 
 import java.io.IOException;
 
-import darwin.jopenctm.*;
+import darwin.jopenctm.data.Mesh;
+import darwin.jopenctm.errorhandling.BadFormatException;
+import darwin.jopenctm.errorhandling.InvalidDataException;
+import darwin.jopenctm.io.CtmInputStream;
+import darwin.jopenctm.io.MeshInfo;
 
-import static darwin.jopenctm.CtmFileReader.*;
+import static darwin.jopenctm.io.CtmFileReader.*;
 
 /**
  *
@@ -23,8 +27,7 @@ public interface MeshDecoder
     public static final int TEXC = getTagInt("TEXC");
     public static final int ATTR = getTagInt("ATTR");
 
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException;
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException;
 
     public boolean isFormatSupported(int tag, int version);
-
 }

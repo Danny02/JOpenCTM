@@ -2,20 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression.mg2;
+package darwin.jopenctm.compression;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.*;
-import darwin.jopenctm.compression.MeshEncoder;
-import darwin.jopenctm.compression.mg1.MG1Encoder;
+import darwin.jopenctm.data.*;
+import darwin.jopenctm.io.CtmOutputStream;
 
-import static darwin.jopenctm.Mesh.*;
+import static darwin.jopenctm.compression.CommonAlgorithms.*;
+import static darwin.jopenctm.compression.MG2Decoder.*;
 import static darwin.jopenctm.compression.MeshDecoder.*;
-import static darwin.jopenctm.compression.mg2.CommonAlgorithms.*;
-import static darwin.jopenctm.compression.mg2.MG2Decoder.*;
+import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.*;
 
 /**
@@ -41,6 +40,11 @@ public class MG2Encoder extends MG1Encoder
         this.normalPrecision = normalPrecision;
     }
 
+    public MG2Encoder()
+    {
+        this(1f / 1024f, 1f / 256f);
+    }
+
     @Override
     public int getTag()
     {
@@ -51,7 +55,7 @@ public class MG2Encoder extends MG1Encoder
     public void encode(final Mesh m, CtmOutputStream out) throws IOException
     {
         final Grid grid = setupGrid(m.vertices);
-        SortVertex[] sorted = sortVertices(grid, m.vertices);
+        SortableVertex[] sorted = sortVertices(grid, m.vertices);
         int[] vdeltas = makeVertexDeltas(m.vertices, sorted, grid);
 
         int[] gridIndicies = new int[m.getVertexCount()];
@@ -77,7 +81,7 @@ public class MG2Encoder extends MG1Encoder
         int[] indices = reIndexIndices(sorted, m.indices);
         rearrangeTriangles(indices);
         makeIndexDeltas(indices);
-        out.writePackedInts(indices, m.getVertexCount(), 3, false);
+        out.writePackedInts(indices, m.getTriangleCount(), 3, false);
 
         if (m.hasNormals()) {
 
@@ -186,14 +190,14 @@ public class MG2Encoder extends MG1Encoder
         return idx[0] + grid.division[0] * (idx[1] + grid.division[1] * idx[2]);
     }
 
-    private SortVertex[] sortVertices(Grid grid, float[] v)
+    private SortableVertex[] sortVertices(Grid grid, float[] v)
     {
         // Prepare sort vertex array
         int vc = v.length / CTM_POSITION_ELEMENT_COUNT;
-        SortVertex[] sortVertices = new SortVertex[v.length];
+        SortableVertex[] sortVertices = new SortableVertex[vc];
         for (int i = 0; i < vc; ++i) {
             // Store vertex properties in the sort vertex array
-            sortVertices[i] = new SortVertex(v[i * 3],
+            sortVertices[i] = new SortableVertex(v[i * 3],
                     pointToGridIdx(grid, v[i * 3], v[i * 3 + 1], v[i * 3 + 2]), i);
         }
 
@@ -206,7 +210,7 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Re-index all indices, based on the sorted vertices.
      */
-    private int[] reIndexIndices(SortVertex[] sortVertices, int[] indices)
+    private int[] reIndexIndices(SortableVertex[] sortVertices, int[] indices)
     {
         // Create temporary lookup-array, O(n)
         int[] indexLUT = new int[sortVertices.length];
@@ -228,9 +232,9 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeVertexDeltas(float[] vertices, SortVertex[] sortVertices, Grid grid)
+    private int[] makeVertexDeltas(float[] vertices, SortableVertex[] sortVertices, Grid grid)
     {
-        int vc = sortVertices.length / CTM_POSITION_ELEMENT_COUNT;
+        int vc = sortVertices.length;
 
         // Vertex scaling factor
         float scale = 1.0f / vertexPrecision;
@@ -270,7 +274,7 @@ public class MG2Encoder extends MG1Encoder
      * Convert the normals to a new coordinate system: magnitude, phi, theta
      * (relative to predicted smooth normals).
      */
-    private int[] makeNormalDeltas(float[] vertices, float[] normals, int[] indices, SortVertex[] sortVertices)
+    private int[] makeNormalDeltas(float[] vertices, float[] normals, int[] indices, SortableVertex[] sortVertices)
     {
         // Calculate smooth normals (Note: aVertices and aIndices use the sorted
         // index space, so smoothNormals will too)
@@ -347,11 +351,11 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeUVCoordDeltas(AttributeData map, SortVertex[] sortVertices)
+    private int[] makeUVCoordDeltas(AttributeData map, SortableVertex[] sortVertices)
     {
         // UV coordinate scaling factor
         float scale = 1.0f / map.precision;
-        int vc = sortVertices.length / CTM_POSITION_ELEMENT_COUNT;
+        int vc = sortVertices.length;
         int prevU = 0, prevV = 0;
         int[] intUVCoords = new int[vc * CTM_UV_ELEMENT_COUNT];
         for (int i = 0; i < vc; ++i) {
@@ -377,14 +381,14 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeAttribDeltas(AttributeData map, SortVertex[] sortVertices)
+    private int[] makeAttribDeltas(AttributeData map, SortableVertex[] sortVertices)
     {
         // Attribute scaling factor
         float scale = 1.0f / map.precision;
 
         int[] prev = new int[4];
 
-        int vc = sortVertices.length / CTM_POSITION_ELEMENT_COUNT;
+        int vc = sortVertices.length;
         int[] intAttribs = new int[vc * CTM_ATTR_ELEMENT_COUNT];
 
         for (int i = 0; i < vc; ++i) {

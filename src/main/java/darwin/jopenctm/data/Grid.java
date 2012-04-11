@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression.mg2;
+package darwin.jopenctm.data;
 
 import java.io.IOException;
 
-import darwin.jopenctm.CtmInputStream;
-import darwin.jopenctm.CtmOutputStream;
+import darwin.jopenctm.io.CtmInputStream;
+import darwin.jopenctm.io.CtmOutputStream;
 
 /**
  *

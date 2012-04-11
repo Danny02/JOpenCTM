@@ -2,13 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression.mg1;
+package darwin.jopenctm.compression;
 
+import darwin.jopenctm.data.Triangle;
 import java.io.IOException;
 import java.util.Arrays;
 
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.CtmOutputStream;
+import darwin.jopenctm.io.CtmOutputStream;
 import darwin.jopenctm.compression.MeshEncoder;
 import darwin.jopenctm.compression.RawEncoder;
 

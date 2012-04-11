@@ -2,14 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm;
+package darwin.jopenctm.io;
 
+import darwin.jopenctm.data.Mesh;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import darwin.jopenctm.compression.MeshEncoder;
+import darwin.jopenctm.errorhandling.InvalidDataException;
 
-import static darwin.jopenctm.CtmFileReader.*;
+import static darwin.jopenctm.io.CtmFileReader.*;
 
 /**
  *
@@ -27,12 +29,10 @@ public class CtmFileWriter
         encoder = e;
     }
 
-    public void encode(Mesh m, String comment) throws IOException
+    public void encode(Mesh m, String comment) throws IOException, InvalidDataException
     {
         // Check mesh integrity
-        if (!m.checkIntegrity()) {
-            throw new IOException("The integrity check of the mesh failed");
-        }
+        m.checkIntegrity();
 
         // Determine flags
         int flags = 0;

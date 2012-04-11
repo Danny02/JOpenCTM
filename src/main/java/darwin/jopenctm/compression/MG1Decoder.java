@@ -2,16 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression.mg1;
+package darwin.jopenctm.compression;
 
 import java.io.IOException;
 
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.*;
-import darwin.jopenctm.compression.MeshDecoder;
-import darwin.jopenctm.compression.RawDecoder;
+import darwin.jopenctm.data.Mesh;
+import darwin.jopenctm.errorhandling.BadFormatException;
+import darwin.jopenctm.errorhandling.InvalidDataException;
+import darwin.jopenctm.io.CtmInputStream;
+import darwin.jopenctm.io.MeshInfo;
 
-import static darwin.jopenctm.CtmFileReader.*;
+import static darwin.jopenctm.io.CtmFileReader.*;
 
 /**
  *
@@ -24,7 +26,7 @@ public class MG1Decoder extends RawDecoder
     public static final int MG1_TAG = getTagInt("MG1\0");
 
     @Override
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException
     {
         Mesh m = super.decode(minfo, in);
         restoreIndices(minfo.getTriangleCount(), m.indices);

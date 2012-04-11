@@ -4,13 +4,18 @@
  */
 package darwin.jopenctm.compression;
 
+import darwin.jopenctm.data.AttributeData;
+import darwin.jopenctm.io.MeshInfo;
+import darwin.jopenctm.io.CtmInputStream;
 import java.io.IOException;
 
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.*;
+import darwin.jopenctm.data.Mesh;
+import darwin.jopenctm.errorhandling.BadFormatException;
+import darwin.jopenctm.errorhandling.InvalidDataException;
 
-import static darwin.jopenctm.CtmFileReader.*;
-import static darwin.jopenctm.Mesh.*;
+import static darwin.jopenctm.io.CtmFileReader.*;
+import static darwin.jopenctm.data.Mesh.*;
 
 /**
  *
@@ -24,7 +29,7 @@ public class RawDecoder implements MeshDecoder
     public static final int FORMAT_VERSION = 5;
 
     @Override
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException
     {
         int vc = minfo.getVertexCount();
 
@@ -56,10 +61,10 @@ public class RawDecoder implements MeshDecoder
         return new Mesh(vertices, normals, indices, tex, att);
     }
 
-    protected void checkTag(int readTag, int expectedTag) throws IOException
+    protected void checkTag(int readTag, int expectedTag) throws BadFormatException
     {
         if (readTag != expectedTag) {
-            throw new IOException("Instead of the expected data tag(\"" + unpack(expectedTag)
+            throw new BadFormatException("Instead of the expected data tag(\"" + unpack(expectedTag)
                     + "\") the tag(\"" + unpack(readTag) + "\") was read!");
         }
     }

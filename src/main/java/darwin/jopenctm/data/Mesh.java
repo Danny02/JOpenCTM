@@ -2,7 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm;
+package darwin.jopenctm.data;
+
+import darwin.jopenctm.errorhandling.InvalidDataException;
 
 /**
  *
@@ -15,7 +17,7 @@ public class Mesh
     public static final int CTM_NORMAL_ELEMENT_COUNT = 3;
     public static final int CTM_POSITION_ELEMENT_COUNT = 3;
     public static final int CTM_UV_ELEMENT_COUNT = 2;
-
+    //
     public final float[] vertices, normals;
     public final int[] indices;
     // Multiple sets of UV coordinate maps (optional)
@@ -83,29 +85,31 @@ public class Mesh
         return totalLength / edgeCount;
     }
 
-    public boolean checkIntegrity()
+    public void checkIntegrity() throws InvalidDataException
     {
         // Check that we have all the mandatory data
         if (vertices == null || indices == null || vertices.length < 1
                 || getTriangleCount() < 1) {
-            return false;
+            throw new InvalidDataException("The vertice or indice array is NULL"
+                    + " or has less then one element!");
         }
 
         if (indices.length % 3 != 0) {
-            return false;
+            throw new InvalidDataException("The indice array size is not a multible of three!");
         }
 
         // Check that all indices are within range
         for (int ind : indices) {
             if (ind >= vertices.length) {
-                return false;
+                throw new InvalidDataException("One element of the indice array "
+                        + "points to a none existing vertex(id: " + ind + ")");
             }
         }
 
         // Check that all vertices are finite (non-NaN, non-inf)
         for (float v : vertices) {
             if (isNotFinit(v)) {
-                return false;
+                throw new InvalidDataException("One of the vertice values is not finit!");
             }
         }
 
@@ -113,7 +117,7 @@ public class Mesh
         if (normals != null) {
             for (float n : normals) {
                 if (isNotFinit(n)) {
-                    return false;
+                    throw new InvalidDataException("One of the normal values is not finit!");
                 }
             }
         }
@@ -122,7 +126,7 @@ public class Mesh
         for (AttributeData map : texcoordinates) {
             for (float v : map.values) {
                 if (isNotFinit(v)) {
-                    return false;
+                    throw new InvalidDataException("One of the texcoord values is not finit!");
                 }
             }
         }
@@ -131,12 +135,10 @@ public class Mesh
         for (AttributeData map : attributs) {
             for (float v : map.values) {
                 if (isNotFinit(v)) {
-                    return false;
+                    throw new InvalidDataException("One of the attribute values is not finit!");
                 }
             }
         }
-
-        return true;
     }
 
     private boolean isNotFinit(float value)

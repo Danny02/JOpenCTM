@@ -2,13 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm;
+package darwin.jopenctm.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ServiceLoader;
 
 import darwin.jopenctm.compression.MeshDecoder;
+import darwin.jopenctm.data.Mesh;
+import darwin.jopenctm.errorhandling.BadFormatException;
+import darwin.jopenctm.errorhandling.InvalidDataException;
 
 /**
  *
@@ -21,16 +24,22 @@ public class CtmFileReader
     private Mesh mesh;
     private String comment;
     private final CtmInputStream in;
+    private boolean decoded;
 
     public CtmFileReader(InputStream source)
     {
         in = new CtmInputStream(source);
     }
 
-    public Mesh decode() throws IOException
+    public Mesh decode() throws IOException, BadFormatException, InvalidDataException
     {
+        if (decoded) {
+            throw new RuntimeException("Ctm File got already decoded");
+        }
+        decoded = true;
+
         if (in.readLittleInt() != OCTM) {
-            throw new IOException("Bad format: the CTM file doesn't start with the OCTM tag!");
+            throw new BadFormatException("The CTM file doesn't start with the OCTM tag!");
         }
         int formatVersion = in.readLittleInt();
         int methodTag = in.readLittleInt();
@@ -58,9 +67,8 @@ public class CtmFileReader
         }
 
         // Check mesh integrity
-        if (!m.checkIntegrity()) {
-            throw new IOException("The integrity check of the mesh failed");
-        }
+        m.checkIntegrity();
+
         return m;
     }
 
@@ -74,19 +82,30 @@ public class CtmFileReader
         return new String(chars);
     }
 
-    public String getFileComment() throws IOException
+    /**
+     * before calling this method the first time, the decode method has to be
+     * called.
+     * <p/>
+     * @throws RuntimeExceptio- if the file wasn't decoded before.
+     */
+    public String getFileComment()
     {
-        if (mesh == null) {
-            mesh = decode();
+        if (!decoded) {
+            throw new RuntimeException("The CTM file is not decoded yet.");
         }
         return comment;
     }
 
-    public Mesh getMesh() throws IOException
+    /**
+     * before calling this method the first time, the decode method has to be
+     * called.
+     * <p/>
+     * @throws RuntimeExceptio- if the file wasn't decoded before.
+     */
+    public Mesh getMesh()
     {
-        //TODO was wenn das decoden fehl schlaegt oder schonmal faehl geschlagen sit
-        if (mesh == null) {
-            mesh = decode();
+        if (!decoded) {
+            throw new RuntimeException("The CTM file is not decoded yet.");
         }
         return mesh;
     }

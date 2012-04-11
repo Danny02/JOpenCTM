@@ -40,6 +40,8 @@ public class MeshDecoderTest extends TestCase
      */
     public void testDecode() throws Exception
     {
+
+
         InputStream is = getClass().getResourceAsStream("/Brunnen.obj");
         if(is == null)
             fail("couldn't load model Brunnen");
@@ -55,6 +57,7 @@ public class MeshDecoderTest extends TestCase
         }
 
         System.out.println(tmpCtm.getAbsolutePath());
+        System.out.println(tmpCtm.length());
 
         mr = new CtmModelReader();
         is = new FileInputStream(tmpCtm);

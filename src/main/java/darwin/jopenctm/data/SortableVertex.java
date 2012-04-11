@@ -2,13 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package darwin.jopenctm.compression.mg2;
+package darwin.jopenctm.data;
 
 /**
  *
  * @author daniel
  */
-public class SortVertex implements Comparable<SortVertex>
+public class SortableVertex implements Comparable<SortableVertex>
 {
 
     /**
@@ -24,7 +24,7 @@ public class SortVertex implements Comparable<SortVertex>
      */
     public final int originalIndex;
 
-    public SortVertex(float x, int gridIndex, int originalIndex)
+    public SortableVertex(float x, int gridIndex, int originalIndex)
     {
         this.x = x;
         this.gridIndex = gridIndex;
@@ -32,7 +32,7 @@ public class SortVertex implements Comparable<SortVertex>
     }
 
     @Override
-    public int compareTo(SortVertex o)
+    public int compareTo(SortableVertex o)
     {
         if (gridIndex != o.gridIndex) {
             return gridIndex - o.gridIndex;
