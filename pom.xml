@@ -69,11 +69,6 @@
             <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org</groupId>
-            <artifactId>jLZMA-IO</artifactId>
-            <version>1.0</version>
-        </dependency>
     </dependencies>
 
     <pluginRepositories>
