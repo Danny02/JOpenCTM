@@ -16,12 +16,15 @@
  */
 package darwin.jopenctm.data;
 
+import java.util.Arrays;
+
 /**
  *
  * @author daniel
  */
 public class Triangle implements Comparable<Triangle>
 {
+
     int[] elements = new int[3];
 
     public Triangle(int[] source, int offset)
@@ -45,4 +48,27 @@ public class Triangle implements Comparable<Triangle>
         return elements[2] - o.elements[2];
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Triangle other = (Triangle) obj;
+        if (!Arrays.equals(this.elements, other.elements)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 5;
+        hash = 89 * hash + Arrays.hashCode(this.elements);
+        return hash;
+    }
 }

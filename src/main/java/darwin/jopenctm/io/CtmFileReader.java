@@ -53,10 +53,11 @@ public class CtmFileReader
         if (in.readLittleInt() != OCTM) {
             throw new BadFormatException("The CTM file doesn't start with the OCTM tag!");
         }
-        int formatVersion = in.readLittleInt();
-        int methodTag = in.readLittleInt();
 
-        MeshInfo mi = new MeshInfo(in.readLittleInt(),//vertex count
+        final int formatVersion = in.readLittleInt();
+        final int methodTag = in.readLittleInt();
+
+        final MeshInfo mi = new MeshInfo(in.readLittleInt(),//vertex count
                 in.readLittleInt(), //triangle count
                 in.readLittleInt(), //uvmap count
                 in.readLittleInt(), //attribute count
@@ -106,20 +107,6 @@ public class CtmFileReader
             throw new RuntimeException("The CTM file is not decoded yet.");
         }
         return comment;
-    }
-
-    /**
-     * before calling this method the first time, the decode method has to be
-     * called.
-     * <p/>
-     * @throws RuntimeExceptio- if the file wasn't decoded before.
-     */
-    public Mesh getMesh()
-    {
-        if (!decoded) {
-            throw new RuntimeException("The CTM file is not decoded yet.");
-        }
-        return mesh;
     }
 
     public static int getTagInt(String tag)

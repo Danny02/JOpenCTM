@@ -35,7 +35,9 @@ public class CtmInputStream extends DataInputStream
         int len = readLittleInt();
         if (len > 0) {
             byte[] values = new byte[len];
-            read(values);
+            if (read(values) == -1) {
+                throw new IOException("End of file reached while parsing the file!");
+            }
             return new String(values);
         } else {
             return "";
@@ -75,7 +77,7 @@ public class CtmInputStream extends DataInputStream
     public int[] readPackedInts(int count, int size, boolean signed) throws IOException
     {
         int[] data = new int[count * size];
-        byte[] tmp = readPackedData(count * size * 4);
+        byte[] tmp = readPackedData(count * size * 4);//a Integer is 4 bytes
         // Convert interleaved array to integers
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
@@ -93,7 +95,7 @@ public class CtmInputStream extends DataInputStream
     public float[] readPackedFloats(int count, int size) throws IOException
     {
         float[] data = new float[count * size];
-        byte[] tmp = readPackedData(count * size * 4);
+        byte[] tmp = readPackedData(count * size * 4);//a Float is 4 bytes
         // Convert interleaved array to floats
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
@@ -108,10 +110,14 @@ public class CtmInputStream extends DataInputStream
     private byte[] readPackedData(int size) throws IOException
     {
         byte[] packed = new byte[readLittleInt() + 5];//lzma properties are 5 bytes big
-        read(packed);
+        if (read(packed) == -1) {
+            throw new IOException("End of file reached while reading!");
+        }
 
-        byte[] tmp = new byte[size]; //a Float is 4 bytes
-        new PackedInputStream(packed).read(tmp);
+        byte[] tmp = new byte[size];
+        try (InputStream is = new PackedInputStream(packed)) {
+            is.read(tmp);
+        }
         return tmp;
     }
 

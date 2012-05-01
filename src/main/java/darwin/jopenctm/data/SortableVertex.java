@@ -56,4 +56,24 @@ public class SortableVertex implements Comparable<SortableVertex>
             return 0;
         }
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(!(obj instanceof SortableVertex))
+            return false;
+        SortableVertex o = (SortableVertex)obj;
+
+        return gridIndex == o.gridIndex && x == o.x;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 31 * hash + Float.floatToIntBits(this.x);
+        hash = 31 * hash + this.gridIndex;
+        return hash;
+    }
+
 }

@@ -25,7 +25,7 @@ import org.cservenak.streams.CoderThread;
  *
  * @author daniel
  */
-public class PackedInputStream extends InputStream
+public final class PackedInputStream extends InputStream
 {
 
     private final CoderThread ct;

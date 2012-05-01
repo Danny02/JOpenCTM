@@ -43,18 +43,12 @@ public class CtmOutputStream extends DataOutputStream
 
     public void writeString(String text) throws IOException
     {
-        int len;
-
-        // Get string length
         if (text != null) {
-            len = text.length();
+            writeLittleInt(text.length());
+            write(text.getBytes());
         } else {
-            len = 0;
+            writeLittleInt(0);
         }
-
-        // Write string length
-        writeLittleInt(len);
-        write(text.getBytes());
     }
 
     public void writeLittleInt(int v) throws IOException
@@ -72,8 +66,8 @@ public class CtmOutputStream extends DataOutputStream
 
     public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
     {
-        assert data.length >= count * size: "The data to be written is smaller"
-                + " as stated by other parameters. Needed: "+(count*size)+" Provided: "+data.length;
+        assert data.length >= count * size : "The data to be written is smaller"
+                + " as stated by other parameters. Needed: " + (count * size) + " Provided: " + data.length;
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 
@@ -94,8 +88,8 @@ public class CtmOutputStream extends DataOutputStream
 
     public void writePackedFloats(float[] data, int count, int size) throws IOException
     {
-        assert data.length >= count * size: "The data to be written is smaller"
-                + " as stated by other parameters. Needed: "+(count*size)+" Provided: "+data.length;
+        assert data.length >= count * size : "The data to be written is smaller"
+                + " as stated by other parameters. Needed: " + (count * size) + " Provided: " + data.length;
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 
@@ -132,7 +126,7 @@ public class CtmOutputStream extends DataOutputStream
         } else {
             enc.setDictionarySize(1 << 26);
         }
-        enc.setNumFastBytes(compressionLevel < 7 ? 32:64);
+        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
 
         try (LzmaOutputStream lzout = new LzmaOutputStream(bout, new CustomWrapper(enc))) {
             lzout.write(data);
