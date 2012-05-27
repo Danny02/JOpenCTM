@@ -16,6 +16,9 @@
  */
 package darwin.jopenctm.compression;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import darwin.jopenctm.data.Grid;
 
 import static darwin.jopenctm.data.Mesh.*;
@@ -92,13 +95,10 @@ public class CommonAlgorithms
         int tc = indices.length / 3;
         float[] smoothNormals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];//no setting to 0 needed in Java compared to C
 
-        // Calculate sums of all neigbouring triangle normals for each vertex
+        // Calculate sums of all neighboring triangle normals for each vertex
         for (int i = 0; i < tc; ++i) {
             // Get triangle corner indices
-            int[] tri = new int[3];
-            for (int j = 0; j < 3; ++j) {
-                tri[j] = indices[i * 3 + j];
-            }
+            int[] tri = Arrays.copyOfRange(indices, i*3, i*3+3);            
 
             // Calculate the normalized cross product of two triangle edges (i.e. the
             // flat triangle normal)

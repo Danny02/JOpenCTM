@@ -25,7 +25,6 @@ import darwin.jopenctm.io.CtmOutputStream;
 
 import static darwin.jopenctm.compression.CommonAlgorithms.*;
 import static darwin.jopenctm.compression.MG2Decoder.*;
-import static darwin.jopenctm.compression.MeshDecoder.*;
 import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.*;
 
