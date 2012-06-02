@@ -16,13 +16,12 @@
  */
 package darwin.jopenctm.compression;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import darwin.jopenctm.data.Grid;
 
 import static darwin.jopenctm.data.Mesh.*;
-import static java.lang.Math.*;
+import static java.lang.Math.sqrt;
 
 /**
  *
@@ -98,7 +97,7 @@ public class CommonAlgorithms
         // Calculate sums of all neighboring triangle normals for each vertex
         for (int i = 0; i < tc; ++i) {
             // Get triangle corner indices
-            int[] tri = Arrays.copyOfRange(indices, i*3, i*3+3);            
+            int[] tri = Arrays.copyOfRange(indices, i*3, i*3+3);
 
             // Calculate the normalized cross product of two triangle edges (i.e. the
             // flat triangle normal)
