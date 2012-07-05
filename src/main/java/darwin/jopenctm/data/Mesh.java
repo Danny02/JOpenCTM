@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
@@ -105,7 +105,7 @@ public class Mesh
         if (vertices == null || indices == null || vertices.length < 1
                 || getTriangleCount() < 1) {
             throw new InvalidDataException("The vertice or indice array is NULL"
-                    + " or has less then one element!");
+                    + " or empty!");
         }
 
         if (indices.length % 3 != 0) {
