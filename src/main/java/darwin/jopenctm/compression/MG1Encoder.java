@@ -21,48 +21,40 @@ package darwin.jopenctm.compression;
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.Triangle;
 import darwin.jopenctm.io.CtmOutputStream;
-
 import java.io.IOException;
 import java.util.Arrays;
-
-
 
 /**
  *
  * @author daniel
  */
 @ServiceProvider(MeshEncoder.class)
-public class MG1Encoder extends RawEncoder
-{
+public class MG1Encoder extends RawEncoder {
 
     @Override
-    public int getTag()
-    {
+    public int getTag() {
         return MG1Decoder.MG1_TAG;
     }
 
     @Override
-    protected void writeFloatArray(float[] array, CtmOutputStream out, int count, int size) throws IOException
-    {
-        out.writePackedFloats(array, count,
-                size);
+    protected void writeFloatArray(float[] array, CtmOutputStream out,
+                                   int count, int size) throws IOException {
+        out.writePackedFloats(array, count, size);
     }
 
     @Override
-    protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException
-    {
+    protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException {
         int[] tmp = new int[indices.length];
         System.arraycopy(indices, 0, tmp, 0, tmp.length);
-        rearrangeTriangles(indices);
-        makeIndexDeltas(indices);
-        out.writePackedInts(tmp, indices.length / 3, 3, false);
+        rearrangeTriangles(tmp);
+        makeIndexDeltas(tmp);
+        out.writePackedInts(tmp, tmp.length / 3, 3, false);
     }
 
     /**
      * Re-arrange all triangles for optimal compression.
      */
-    public void rearrangeTriangles(int[] indices)
-    {
+    public void rearrangeTriangles(int[] indices) {
         assert indices.length % 3 == 0;
         // Step 1: Make sure that the first index of each triangle is the smallest
         // one (rotate triangle nodes if necessary)
@@ -98,8 +90,7 @@ public class MG1Encoder extends RawEncoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    public void makeIndexDeltas(int[] indices)
-    {
+    public void makeIndexDeltas(int[] indices) {
         assert indices.length % 3 == 0;
 
         for (int i = indices.length / 3 - 1; i >= 0; --i) {

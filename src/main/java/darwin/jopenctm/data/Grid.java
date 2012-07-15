@@ -18,70 +18,87 @@
  */
 package darwin.jopenctm.data;
 
-import java.io.IOException;
-
 import darwin.jopenctm.io.CtmInputStream;
 import darwin.jopenctm.io.CtmOutputStream;
+import java.io.IOException;
 
 /**
  *
  * @author daniel
  */
-public class Grid
-{
+public class Grid {
 
     /**
-     * Axis-aligned boudning box for the grid
+     * Axis-aligned bounding box for the grid
      */
-    public final float[] min = new float[3];
-    public final float[] max = new float[3];
+    private final float[] min, max;
     /**
      * How many divisions per axis (minimum 1).
      */
-    public final int[] division = new int[3];
-    /**
-     * Size of each grid box.
-     */
-    public final float[] size = new float[3];
+    private final int[] division;
 
-    public void writeToStream(CtmOutputStream out) throws IOException
-    {
-        for (int i = 0; i < 3; i++) {
-            out.writeLittleFloat(min[i]);
-        }
-
-        for (int i = 0; i < 3; i++) {
-            out.writeLittleFloat(max[i]);
-        }
-        for (int i = 0; i < 3; i++) {
-            out.writeLittleInt(division[i]);
-        }
+    public static Grid fromStream(CtmInputStream in) throws IOException {
+        return new Grid(in.readLittleFloatArray(3),
+                        in.readLittleFloatArray(3),
+                        in.readLittleIntArray(3));
     }
 
-    public void readFromStream(CtmInputStream in) throws IOException
-    {
-        for (int i = 0; i < 3; i++) {
-            min[i] = in.readLittleFloat();
+    public Grid(float[] min, float[] max, int[] division) {
+        this.min = min;
+        this.max = max;
+        this.division = division;
+    }
+
+    public void writeToStream(CtmOutputStream out) throws IOException {
+        out.writeLittleFloatArray(min);
+        out.writeLittleFloatArray(max);
+        out.writeLittleIntArray(division);
+    }
+
+    public void readFromStream(CtmInputStream in) throws IOException {
+    }
+
+    public boolean checkIntegrity() {
+        if (min.length != 3) {
+            return false;
         }
-        for (int i = 0; i < 3; i++) {
-            max[i] = in.readLittleFloat();
+        if (max.length != 3) {
+            return false;
         }
-        for (int i = 0; i < 3; i++) {
-            division[i] = in.readLittleInt();
+        if (division.length != 3) {
+            return false;
         }
 
         for (int d : division) {
             if (d < 1) {
-                throw new IOException("Bad Format");
+                return false;
             }
         }
         for (int i = 0; i < 3; i++) {
             if (max[i] < min[i]) {
-                throw new IOException("Bad Format");
+                return false;
             }
         }
+        return true;
+    }
+
+    public float[] getMin() {
+        return min;
+    }
+
+    public float[] getMax() {
+        return max;
+    }
+
+    public int[] getDivision() {
+        return division;
+    }
+
+    public float[] getSize() {
+        float[] size = new float[3];
         for (int i = 0; i < 3; i++) {
             size[i] = (max[i] - min[i]) / division[i];
         }
+        return size;
     }
 }

@@ -18,55 +18,56 @@
  */
 package darwin.jopenctm.compression;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.data.*;
-import darwin.jopenctm.io.CtmOutputStream;
-
 import static darwin.jopenctm.compression.CommonAlgorithms.*;
 import static darwin.jopenctm.compression.MG2Decoder.*;
+import static darwin.jopenctm.compression.MeshDecoder.ATTR;
+import static darwin.jopenctm.compression.MeshDecoder.INDX;
+import static darwin.jopenctm.compression.MeshDecoder.NORM;
+import static darwin.jopenctm.compression.MeshDecoder.TEXC;
+import static darwin.jopenctm.compression.MeshDecoder.VERT;
+import darwin.jopenctm.data.*;
 import static darwin.jopenctm.data.Mesh.*;
+import darwin.jopenctm.io.CtmOutputStream;
+import java.io.IOException;
 import static java.lang.Math.*;
+import java.util.Arrays;
 
 /**
  *
  * @author daniel
  */
 @ServiceProvider(MeshEncoder.class)
-public class MG2Encoder extends MG1Encoder
-{
+public class MG2Encoder extends MG1Encoder {
+
+    public static final float STANDARD_NORMAL_PRECISION = 1f / 256f;
+    public static final float STANDARD_VERTEX_PRECISION = 1f / 1024f;
 
     static {
         assert CTM_NORMAL_ELEMENT_COUNT == 3
-                && CTM_POSITION_ELEMENT_COUNT == 3
-                && CTM_UV_ELEMENT_COUNT == 2
-                && CTM_ATTR_ELEMENT_COUNT == 4 :
+               && CTM_POSITION_ELEMENT_COUNT == 3
+               && CTM_UV_ELEMENT_COUNT == 2
+               && CTM_ATTR_ELEMENT_COUNT == 4 :
                 "This Class is not compatible to this version of the Lib!";
     }
     private final float vertexPrecision, normalPrecision;
 
-    public MG2Encoder(float vertexPrecision, float normalPrecision)
-    {
+    public MG2Encoder(float vertexPrecision, float normalPrecision) {
         this.vertexPrecision = vertexPrecision;
         this.normalPrecision = normalPrecision;
     }
 
-    public MG2Encoder()
-    {
-        this(1f / 1024f, 1f / 256f);
+    public MG2Encoder() {
+        this(STANDARD_VERTEX_PRECISION, STANDARD_NORMAL_PRECISION);
     }
 
     @Override
-    public int getTag()
-    {
+    public int getTag() {
         return MG2_Tag;
     }
 
     @Override
-    public void encode(final Mesh m, CtmOutputStream out) throws IOException
-    {
+    public void encode(final Mesh m, CtmOutputStream out) throws IOException {
         final Grid grid = setupGrid(m.vertices);
         SortableVertex[] sorted = sortVertices(grid, m.vertices);
         int[] vdeltas = makeVertexDeltas(m.vertices, sorted, grid);
@@ -129,20 +130,22 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Setup the 3D space subdivision grid.
      */
-    private Grid setupGrid(float[] vertices)
-    {
-        Grid grid = new Grid();
+    private Grid setupGrid(float[] vertices) {
         int vc = vertices.length / 3;
         //CTM_POSITION_ELEMENT_COUNT == 3
-        // Calculate the mesh bounding box
+        // Calculate the mesh boundinggrid. box
+        float[] min = new float[3];
+        float[] max = new float[3];
+        int[] division = new int[3];
+
         for (int i = 0; i < 3; ++i) {
-            grid.min[i] = grid.max[i] = vertices[i];
+            min[i] = max[i] = vertices[i];
 
         }
         for (int i = 1; i < vc; ++i) {
             for (int j = 0; j < 3; j++) {
-                grid.min[j] = min(grid.min[j], vertices[i * 3 + j]);
-                grid.max[j] = max(grid.max[j], vertices[i * 3 + j]);
+                min[j] = min(min[j], vertices[i * 3 + j]);
+                max[j] = max(max[j], vertices[i * 3 + j]);
             }
         }
 
@@ -154,9 +157,11 @@ public class MG2Encoder extends MG1Encoder
 
         float[] factor = new float[3];
         for (int i = 0; i < 3; ++i) {
-            factor[i] = grid.max[i] - grid.min[i];
+            factor[i] = max[i] - min[i];
         }
+
         float sum = factor[0] + factor[1] + factor[2];
+
         if (sum > 1e-30f) {
             sum = 1.0f / sum;
             for (int i = 0; i < 3; ++i) {
@@ -164,54 +169,45 @@ public class MG2Encoder extends MG1Encoder
             }
             double wantedGrids = pow(100.0f * vc, 1.0f / 3.0f);
             for (int i = 0; i < 3; ++i) {
-                grid.division[i] = (int) ceil(wantedGrids * factor[i]);
-                if (grid.division[i] < 1) {
-                    grid.division[i] = 1;
+                division[i] = (int) ceil(wantedGrids * factor[i]);
+                if (division[i] < 1) {
+                    division[i] = 1;
                 }
             }
         } else {
-            grid.division[0] = 4;
-            grid.division[1] = 4;
-            grid.division[2] = 4;
-        }
-//#ifdef __DEBUG_
-//  printf("Division: (%d %d %d)\n", aGrid->mDivision[0], aGrid->mDivision[1], aGrid->mDivision[2]);
-//#endif
-
-        // Calculate grid sizes
-        for (int i = 0; i < 3; ++i) {
-            grid.size[i] = (grid.max[i] - grid.min[i]) / grid.division[i];
+            division[0] = 4;
+            division[1] = 4;
+            division[2] = 4;
         }
 
-        return grid;
+        return new Grid(min, max, division);
     }
 
     /**
      * Convert a point to a grid index.
      */
-    private int pointToGridIdx(Grid grid, float... point)
-    {
+    private int pointToGridIdx(Grid grid, float... point) {
         int[] idx = new int[3];
+        float[] size = grid.getSize();
 
         for (int i = 0; i < 3; ++i) {
-            idx[i] = (int) floor((point[i] - grid.min[i]) / grid.size[i]);
-            if (idx[i] >= grid.division[i]) {
-                idx[i] = grid.division[i] - 1;
+            idx[i] = (int) floor((point[i] - grid.getMin()[i]) / size[i]);
+            if (idx[i] >= grid.getDivision()[i]) {
+                idx[i] = grid.getDivision()[i] - 1;
             }
         }
 
-        return idx[0] + grid.division[0] * (idx[1] + grid.division[1] * idx[2]);
+        return idx[0] + grid.getDivision()[0] * (idx[1] + grid.getDivision()[1] * idx[2]);
     }
 
-    private SortableVertex[] sortVertices(Grid grid, float[] v)
-    {
+    private SortableVertex[] sortVertices(Grid grid, float[] v) {
         // Prepare sort vertex array
         int vc = v.length / CTM_POSITION_ELEMENT_COUNT;
         SortableVertex[] sortVertices = new SortableVertex[vc];
         for (int i = 0; i < vc; ++i) {
             // Store vertex properties in the sort vertex array
             sortVertices[i] = new SortableVertex(v[i * 3],
-                    pointToGridIdx(grid, v[i * 3], v[i * 3 + 1], v[i * 3 + 2]), i);
+                                                 pointToGridIdx(grid, v[i * 3], v[i * 3 + 1], v[i * 3 + 2]), i);
         }
 
         // Sort vertices. The elements are first sorted by their grid indices, and
@@ -223,8 +219,7 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Re-index all indices, based on the sorted vertices.
      */
-    private int[] reIndexIndices(SortableVertex[] sortVertices, int[] indices)
-    {
+    private int[] reIndexIndices(SortableVertex[] sortVertices, int[] indices) {
         // Create temporary lookup-array, O(n)
         int[] indexLUT = new int[sortVertices.length];
         int[] newIndices = new int[indices.length];
@@ -245,8 +240,7 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeVertexDeltas(float[] vertices, SortableVertex[] sortVertices, Grid grid)
-    {
+    private int[] makeVertexDeltas(float[] vertices, SortableVertex[] sortVertices, Grid grid) {
         int vc = sortVertices.length;
 
         // Vertex scaling factor
@@ -287,8 +281,7 @@ public class MG2Encoder extends MG1Encoder
      * Convert the normals to a new coordinate system: magnitude, phi, theta
      * (relative to predicted smooth normals).
      */
-    private int[] makeNormalDeltas(float[] vertices, float[] normals, int[] indices, SortableVertex[] sortVertices)
-    {
+    private int[] makeNormalDeltas(float[] vertices, float[] normals, int[] indices, SortableVertex[] sortVertices) {
         // Calculate smooth normals (Note: aVertices and aIndices use the sorted
         // index space, so smoothNormals will too)
         float[] smoothNormals = calcSmoothNormals(vertices, indices);
@@ -304,8 +297,8 @@ public class MG2Encoder extends MG1Encoder
 
             // Calculate normal magnitude (should always be 1.0 for unit length normals)
             float magn = (float) sqrt(normals[oldIdx * 3] * normals[oldIdx * 3]
-                    + normals[oldIdx * 3 + 1] * normals[oldIdx * 3 + 1]
-                    + normals[oldIdx * 3 + 2] * normals[oldIdx * 3 + 2]);
+                                      + normals[oldIdx * 3 + 1] * normals[oldIdx * 3 + 1]
+                                      + normals[oldIdx * 3 + 2] * normals[oldIdx * 3 + 2]);
             if (magn < 1e-10f) {
                 magn = 1.0f;
             }
@@ -313,8 +306,8 @@ public class MG2Encoder extends MG1Encoder
             // Invert magnitude if the normal is negative compared to the predicted
             // smooth normal
             if ((smoothNormals[i * 3] * normals[oldIdx * 3]
-                    + smoothNormals[i * 3 + 1] * normals[oldIdx * 3 + 1]
-                    + smoothNormals[i * 3 + 2] * normals[oldIdx * 3 + 2]) < 0.0f) {
+                 + smoothNormals[i * 3 + 1] * normals[oldIdx * 3 + 1]
+                 + smoothNormals[i * 3 + 2] * normals[oldIdx * 3 + 2]) < 0.0f) {
                 magn = -magn;
             }
 
@@ -364,8 +357,7 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeUVCoordDeltas(AttributeData map, SortableVertex[] sortVertices)
-    {
+    private int[] makeUVCoordDeltas(AttributeData map, SortableVertex[] sortVertices) {
         // UV coordinate scaling factor
         float scale = 1.0f / map.precision;
         int vc = sortVertices.length;
@@ -394,8 +386,7 @@ public class MG2Encoder extends MG1Encoder
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
      */
-    private int[] makeAttribDeltas(AttributeData map, SortableVertex[] sortVertices)
-    {
+    private int[] makeAttribDeltas(AttributeData map, SortableVertex[] sortVertices) {
         // Attribute scaling factor
         float scale = 1.0f / map.precision;
 

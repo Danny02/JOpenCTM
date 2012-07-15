@@ -18,12 +18,11 @@
  */
 package darwin.jopenctm.compression;
 
-import java.io.IOException;
-
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.AttributeData;
 import darwin.jopenctm.data.Mesh;
 import darwin.jopenctm.io.CtmOutputStream;
+import java.io.IOException;
 
 import static darwin.jopenctm.compression.MeshDecoder.*;
 
@@ -68,16 +67,12 @@ public class RawEncoder implements MeshEncoder
 
     protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException
     {
-        for (int i : indices) {
-            out.writeLittleInt(i);
-        }
+        out.writeLittleIntArray(indices);
     }
 
     protected void writeFloatArray(float[] array, CtmOutputStream out, int count, int size) throws IOException
     {
-        for (float v : array) {
-            out.writeLittleFloat(v);
-        }
+        out.writeLittleFloatArray(array);
     }
 
     @Override

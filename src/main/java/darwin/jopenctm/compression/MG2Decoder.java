@@ -18,13 +18,12 @@
  */
 package darwin.jopenctm.compression;
 
-import java.io.IOException;
-
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.*;
 import darwin.jopenctm.errorhandling.BadFormatException;
 import darwin.jopenctm.errorhandling.InvalidDataException;
 import darwin.jopenctm.io.*;
+import java.io.IOException;
 
 import static darwin.jopenctm.compression.CommonAlgorithms.*;
 import static darwin.jopenctm.data.Mesh.*;
@@ -35,30 +34,29 @@ import static java.lang.Math.*;
  * @author daniel
  */
 @ServiceProvider(MeshDecoder.class)
-public class MG2Decoder extends MG1Decoder
-{
+public class MG2Decoder extends MG1Decoder {
 
     public static final int MG2_Tag = CtmFileReader.getTagInt("MG2\0");
     public static final int MG2_HEADER_TAG = CtmFileReader.getTagInt("MG2H");
     public static final int GIDX = CtmFileReader.getTagInt("GIDX");
 
     @Override
-    public boolean isFormatSupported(int tag, int version)
-    {
+    public boolean isFormatSupported(int tag, int version) {
         return tag == MG2_Tag && version == RawDecoder.FORMAT_VERSION;
     }
 
     @Override
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException
-    {
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException {
         int vc = minfo.getVertexCount();
 
         checkTag(in.readLittleInt(), MG2_HEADER_TAG);
         float vertexPrecision = in.readLittleFloat();
         float normalPrecision = in.readLittleFloat();
 
-        Grid grid = new Grid();
-        grid.readFromStream(in);
+        Grid grid = Grid.fromStream(in);
+        if(!grid.checkIntegrity()) {
+            throw new InvalidDataException("The vertex size grid is corrupt!");
+        }
 
         float[] vertices = readVertices(in, grid, vc, vertexPrecision);
 
@@ -82,8 +80,7 @@ public class MG2Decoder extends MG1Decoder
         return new Mesh(vertices, normals, indices, uvData, attributs);
     }
 
-    private float[] readVertices(CtmInputStream in, Grid grid, int vcount, float precision) throws IOException, BadFormatException
-    {
+    private float[] readVertices(CtmInputStream in, Grid grid, int vcount, float precision) throws IOException, BadFormatException {
         checkTag(in.readLittleInt(), VERT);
         int[] intVertices = in.readPackedInts(vcount, CTM_POSITION_ELEMENT_COUNT, false);
 
@@ -96,30 +93,27 @@ public class MG2Decoder extends MG1Decoder
         return restoreVertices(intVertices, gridIndices, grid, precision);
     }
 
-    private int[] readIndices(CtmInputStream in, int triCount, int vcount) throws IOException, InvalidDataException, BadFormatException
-    {
+    private int[] readIndices(CtmInputStream in, int triCount, int vcount) throws IOException, InvalidDataException, BadFormatException {
         checkTag(in.readLittleInt(), INDX);
         int[] indices = in.readPackedInts(triCount, 3, false);
         restoreIndices(triCount, indices);
         for (int i : indices) {
             if (i > vcount) {
                 throw new InvalidDataException("One element of the indice array "
-                        + "points to a none existing vertex(id: " + i + ")");
+                                               + "points to a none existing vertex(id: " + i + ")");
             }
         }
         return indices;
     }
 
     private float[] readNormals(CtmInputStream in, float[] vertices, int[] indices,
-            float normalPrecision, int vcount) throws IOException, BadFormatException
-    {
+                                float normalPrecision, int vcount) throws IOException, BadFormatException {
         checkTag(in.readLittleInt(), NORM);
         int[] intNormals = in.readPackedInts(vcount, CTM_NORMAL_ELEMENT_COUNT, false);
         return restoreNormals(intNormals, vertices, indices, normalPrecision);
     }
 
-    private AttributeData readUvData(CtmInputStream in, int vcount) throws IOException, BadFormatException, InvalidDataException
-    {
+    private AttributeData readUvData(CtmInputStream in, int vcount) throws IOException, BadFormatException, InvalidDataException {
         checkTag(in.readLittleInt(), TEXC);
         String name = in.readString();
         String material = in.readString();
@@ -134,8 +128,7 @@ public class MG2Decoder extends MG1Decoder
         return new AttributeData(name, material, precision, data);
     }
 
-    private AttributeData readAttribute(CtmInputStream in, int vc) throws IOException, BadFormatException, InvalidDataException
-    {
+    private AttributeData readAttribute(CtmInputStream in, int vc) throws IOException, BadFormatException, InvalidDataException {
         checkTag(in.readLittleInt(), ATTR);
 
         String name = in.readString();
@@ -153,8 +146,7 @@ public class MG2Decoder extends MG1Decoder
     /**
      * Calculate inverse derivatives of the vertex attributes.
      */
-    private float[] restoreAttribs(float precision, int[] intAttribs)
-    {
+    private float[] restoreAttribs(float precision, int[] intAttribs) {
         int ae = CTM_ATTR_ELEMENT_COUNT;
         int vc = intAttribs.length / ae;
         float[] values = new float[intAttribs.length];
@@ -173,8 +165,7 @@ public class MG2Decoder extends MG1Decoder
     /**
      * Calculate inverse derivatives of the UV coordinates.
      */
-    private float[] restoreUVCoords(float precision, int[] intUVCoords)
-    {
+    private float[] restoreUVCoords(float precision, int[] intUVCoords) {
         int vc = intUVCoords.length / CTM_UV_ELEMENT_COUNT;
         float[] values = new float[intUVCoords.length];
         int prevU = 0, prevV = 0;
@@ -196,8 +187,7 @@ public class MG2Decoder extends MG1Decoder
     /**
      * Convert the normals back to cartesian coordinates.
      */
-    private float[] restoreNormals(int[] intNormals, float[] vertices, int[] indices, float normalPrecision)
-    {
+    private float[] restoreNormals(int[] intNormals, float[] vertices, int[] indices, float normalPrecision) {
 
         // Calculate smooth normals (nominal normals)
         float[] smoothNormals = calcSmoothNormals(vertices, indices);
@@ -233,8 +223,8 @@ public class MG2Decoder extends MG1Decoder
             double[] n = new double[3];
             for (int j = 0; j < 3; ++j) {
                 n[j] = basisAxes[j] * n2[0]
-                        + basisAxes[3 + j] * n2[1]
-                        + basisAxes[6 + j] * n2[2];
+                       + basisAxes[3 + j] * n2[1]
+                       + basisAxes[6 + j] * n2[2];
             }
 
             // Apply normal magnitude, and output to the normals array

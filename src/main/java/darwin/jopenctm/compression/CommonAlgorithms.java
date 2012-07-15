@@ -18,9 +18,8 @@
  */
 package darwin.jopenctm.compression;
 
-import java.util.Arrays;
-
 import darwin.jopenctm.data.Grid;
+import java.util.Arrays;
 
 import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.sqrt;
@@ -70,8 +69,8 @@ public class CommonAlgorithms
     {
         int[] gridIdx = new int[3];
 
-        int zdiv = grid.division[0] * grid.division[1];
-        int ydiv = grid.division[0];
+        int ydiv = grid.getDivision()[0];
+        int zdiv = ydiv * grid.getDivision()[1];
 
         gridIdx[2] = idx / zdiv;
         idx -= gridIdx[2] * zdiv;
@@ -79,9 +78,10 @@ public class CommonAlgorithms
         idx -= gridIdx[1] * ydiv;
         gridIdx[0] = idx;
 
+        float[] size = grid.getSize();
         float[] point = new float[3];
         for (int i = 0; i < 3; ++i) {
-            point[i] = gridIdx[i] * grid.size[i] + grid.min[i];
+            point[i] = gridIdx[i] * size[i] + grid.getMin()[i];
         }
         return point;
     }
