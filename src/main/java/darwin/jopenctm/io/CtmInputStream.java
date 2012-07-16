@@ -18,8 +18,10 @@
  */
 package darwin.jopenctm.io;
 
-import darwin.jlzmaio.LzmaInputStream;
 import java.io.*;
+import java.util.Arrays;
+import lzma.sdk.lzma.Decoder;
+import org.cservenak.streams.Coder;
 
 /**
  *
@@ -120,20 +122,21 @@ public class CtmInputStream extends DataInputStream {
     }
 
     public byte[] readCompressedData(int size) throws IOException {
-//        byte[] packed = new byte[readLittleInt() + 5];//lzma properties are 5 bytes big
-        byte[] packed = new byte[readLittleInt()];//lzma properties are 5 bytes big
+        int packedSize = readLittleInt();
+        byte[] packed = new byte[packedSize + 5];//lzma properties are 5 bytes big
         if (read(packed) == -1) {
             throw new IOException("End of file reached while reading!");
         }
-
-        byte[] tmp = new byte[size];
-//        try (InputStream is = new PackedInputStream(packed)) {
-        try (InputStream is = new LzmaInputStream(new ByteArrayInputStream(packed))) {
-            is.read(tmp);
-        }
-//        read(tmp);
         
-        return tmp;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream(size);
+        
+        CustomCoder coder = new CustomCoder(size);
+        coder.code(new ByteArrayInputStream(packed), bout);
+                
+        byte[] data = bout.toByteArray();
+        assert data.length == size;
+        
+        return data;
     }
 
     public static int interleavedRetrive(byte[] data, int offset, int stride) {
@@ -149,6 +152,33 @@ public class CtmInputStream extends DataInputStream {
 
         return i1 | (i2 << 8) | (i3 << 16) | (i4 << 24);
     }
-    
-    
+
+    private static class CustomCoder implements Coder {
+
+        private final Decoder d;
+        private final int len;
+
+        public CustomCoder(int packedLength) {
+            d = new Decoder();
+            len = packedLength;
+        }
+
+        @Override
+        public void code(final InputStream in, final OutputStream out)
+                throws IOException {
+
+            byte[] properties = new byte[5];
+            if (in.read(properties) != 5) {
+                throw new IOException("LZMA file has no header!");
+            }
+
+            if (!d.setDecoderProperties(properties)) {
+                throw new IOException("Decoder properties cannot be set!");
+            }
+
+            if (!d.code(in, out, len)) {
+                throw new IOException("Decoding unsuccessful!");
+            }            
+        }
+    }
 }

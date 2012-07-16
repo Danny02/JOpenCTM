@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 
@@ -13,7 +11,6 @@ import static org.junit.Assert.*;
  *
  * @author daniel
  */
-@RunWith(MockitoJUnitRunner.class)
 public class CtmStreamTest {
 
     private CtmOutputStream output;
@@ -21,7 +18,7 @@ public class CtmStreamTest {
 
     @Before
     public void setUp() {
-        bout = new ByteArrayOutputStream(256);
+        bout = new ByteArrayOutputStream();
         output = new CtmOutputStream(bout);
     }
 
@@ -118,9 +115,9 @@ public class CtmStreamTest {
     }
 
     @Test
-    public void testCompression() throws IOException {
-        Random rnd = new Random(1337);
-        byte[] data = new byte[3 * rnd.nextInt(1000)];
+    public void testCompression() throws IOException {        
+        Random rnd = new Random(13372);
+        byte[] data = new byte[3*rnd.nextInt(10000)];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) -(rnd.nextInt(255) - 128);
         }

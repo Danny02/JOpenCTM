@@ -18,8 +18,10 @@
  */
 package darwin.jopenctm.io;
 
-import darwin.jlzmaio.LzmaOutputStream;
 import java.io.*;
+import lzma.sdk.lzma.Encoder;
+import lzma.streams.LzmaEncoderWrapper;
+import lzma.streams.LzmaOutputStream;
 
 /**
  *
@@ -118,7 +120,7 @@ public class CtmOutputStream extends DataOutputStream {
         //some magic size as in the OpenCTM reference implementation
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000 + data.length);
 
-//        Encoder enc = new Encoder();
+        Encoder enc = new Encoder();
 //        enc.setEndMarkerMode(true);
 //        if (compressionLevel <= 5) {
 //            enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
@@ -128,32 +130,34 @@ public class CtmOutputStream extends DataOutputStream {
 //            enc.setDictionarySize(1 << 26);
 //        }
 //        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
-
+//
+//            enc.setDictionarySize(1 << (14));
+        
+        enc.code(new ByteArrayInputStream(data), bout, data.length, -1, null);
 //        try (OutputStream lzout = new LzmaOutputStream(bout, new CustomWrapper(enc))) {
-        try (OutputStream lzout = new LzmaOutputStream(bout)) {
-            lzout.write(data);
-        }
+//            lzout.write(data);
+//        }
 
         //This is the custom way of OpenCTM to write the LZMA properties
         this.writeLittleInt(bout.size());
-//        enc.writeCoderProperties(this);
+        enc.writeCoderProperties(this);
         bout.writeTo(this);
 //        write(data);
     }
 
-//    private static class CustomWrapper extends LzmaEncoderWrapper {
-//
-//        private final Encoder e;
-//
-//        CustomWrapper(Encoder encoder) {
-//            super(encoder);
-//            e = encoder;
-//        }
-//
-//        @Override
-//        public void code(InputStream in, OutputStream out) throws IOException {
-//            //both int attributs aren't used inside the method
-//            e.code(in, out, -1, -1, null);
-//        }
-//    }
+    private static class CustomWrapper extends LzmaEncoderWrapper {
+
+        private final Encoder e;
+
+        CustomWrapper(Encoder encoder) {
+            super(encoder);
+            e = encoder;
+        }
+
+        @Override
+        public void code(InputStream in, OutputStream out) throws IOException {
+            //both int attributs aren't used inside the method
+            e.code(in, out, -1, -1, null);
+        }
+    }
 }

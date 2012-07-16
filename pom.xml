@@ -90,6 +90,11 @@
             <artifactId>AnnotationsProcessing</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.jponge</groupId>
+            <artifactId>lzma-java</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 
     <pluginRepositories>
