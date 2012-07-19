@@ -19,13 +19,9 @@
 package darwin.jopenctm.compression;
 
 import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.data.*;
-import darwin.jopenctm.io.CtmFileWriter;
+import darwin.jopenctm.data.Triangle;
 import darwin.jopenctm.io.CtmOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**

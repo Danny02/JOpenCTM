@@ -19,19 +19,18 @@
 package darwin.jopenctm.compression;
 
 import darwin.annotations.ServiceProvider;
-import static darwin.jopenctm.compression.CommonAlgorithms.*;
-import static darwin.jopenctm.compression.MG2Decoder.*;
-import static darwin.jopenctm.compression.MeshDecoder.ATTR;
-import static darwin.jopenctm.compression.MeshDecoder.INDX;
-import static darwin.jopenctm.compression.MeshDecoder.NORM;
-import static darwin.jopenctm.compression.MeshDecoder.TEXC;
-import static darwin.jopenctm.compression.MeshDecoder.VERT;
 import darwin.jopenctm.data.*;
-import static darwin.jopenctm.data.Mesh.*;
+import darwin.jopenctm.io.CtmFileWriter;
 import darwin.jopenctm.io.CtmOutputStream;
 import java.io.IOException;
-import static java.lang.Math.*;
+import java.nio.file.*;
 import java.util.Arrays;
+
+import static darwin.jopenctm.compression.CommonAlgorithms.*;
+import static darwin.jopenctm.compression.MG2Decoder.*;
+import static darwin.jopenctm.compression.MeshDecoder.*;
+import static darwin.jopenctm.data.Mesh.*;
+import static java.lang.Math.*;
 
 /**
  *

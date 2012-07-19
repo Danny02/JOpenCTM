@@ -18,14 +18,14 @@
  */
 package darwin.jopenctm.io;
 
-import darwin.jopenctm.data.Mesh;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import darwin.jopenctm.compression.MeshEncoder;
+import darwin.jopenctm.data.Mesh;
 import darwin.jopenctm.errorhandling.InvalidDataException;
 
-import static darwin.jopenctm.io.CtmFileReader.*;
+import static darwin.jopenctm.io.CtmFileReader.OCTM;
 
 /**
  *
