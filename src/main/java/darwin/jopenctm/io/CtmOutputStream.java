@@ -19,9 +19,9 @@
 package darwin.jopenctm.io;
 
 import java.io.*;
+
 import lzma.sdk.lzma.Encoder;
 import lzma.streams.LzmaEncoderWrapper;
-import lzma.streams.LzmaOutputStream;
 
 /**
  *
@@ -121,17 +121,15 @@ public class CtmOutputStream extends DataOutputStream {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000 + data.length);
 
         Encoder enc = new Encoder();
-//        enc.setEndMarkerMode(true);
-//        if (compressionLevel <= 5) {
-//            enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
-//        } else if (compressionLevel == 6) {
-//            enc.setDictionarySize(1 << 25);
-//        } else {
-//            enc.setDictionarySize(1 << 26);
-//        }
-//        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
-//
-//            enc.setDictionarySize(1 << (14));
+        enc.setEndMarkerMode(true);
+        if (compressionLevel <= 5) {
+            enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
+        } else if (compressionLevel == 6) {
+            enc.setDictionarySize(1 << 25);
+        } else {
+            enc.setDictionarySize(1 << 26);
+        }
+        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
         
         enc.code(new ByteArrayInputStream(data), bout, data.length, -1, null);
 //        try (OutputStream lzout = new LzmaOutputStream(bout, new CustomWrapper(enc))) {

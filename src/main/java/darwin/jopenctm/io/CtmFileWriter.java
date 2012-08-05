@@ -31,20 +31,22 @@ import static darwin.jopenctm.io.CtmFileReader.OCTM;
  *
  * @author daniel
  */
-public class CtmFileWriter
-{
+public class CtmFileWriter {
 
     private final CtmOutputStream out;
     private final MeshEncoder encoder;
 
-    public CtmFileWriter(OutputStream o, MeshEncoder e)
-    {
+    public CtmFileWriter(OutputStream o, MeshEncoder e) {
         out = new CtmOutputStream(o);
         encoder = e;
     }
 
-    public void encode(Mesh m, String comment) throws IOException, InvalidDataException
-    {
+    public CtmFileWriter(OutputStream o, MeshEncoder e, int compressionLevel) {
+        out = new CtmOutputStream(compressionLevel, o);
+        encoder = e;
+    }
+
+    public void encode(Mesh m, String comment) throws IOException, InvalidDataException {
         // Check mesh integrity
         m.checkIntegrity();
 

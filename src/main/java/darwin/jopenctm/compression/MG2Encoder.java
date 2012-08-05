@@ -18,13 +18,12 @@
  */
 package darwin.jopenctm.compression;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.*;
-import darwin.jopenctm.io.CtmFileWriter;
 import darwin.jopenctm.io.CtmOutputStream;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.Arrays;
 
 import static darwin.jopenctm.compression.CommonAlgorithms.*;
 import static darwin.jopenctm.compression.MG2Decoder.*;
