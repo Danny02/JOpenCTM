@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
@@ -23,29 +23,24 @@ import lzma.sdk.lzma.Encoder;
 import lzma.streams.LzmaEncoderWrapper;
 import lzma.streams.LzmaOutputStream;
 
-
 /**
  *
  * @author daniel
  */
-public class CtmOutputStream extends DataOutputStream
-{
+public class CtmOutputStream extends DataOutputStream {
 
     private final int compressionLevel;
 
-    public CtmOutputStream(OutputStream out)
-    {
+    public CtmOutputStream(OutputStream out) {
         this(5, out);
     }
 
-    public CtmOutputStream(int compressionLevel, OutputStream out)
-    {
+    public CtmOutputStream(int compressionLevel, OutputStream out) {
         super(out);
         this.compressionLevel = compressionLevel;
     }
 
-    public void writeString(String text) throws IOException
-    {
+    public void writeString(String text) throws IOException {
         if (text != null) {
             writeLittleInt(text.length());
             write(text.getBytes());
@@ -54,21 +49,30 @@ public class CtmOutputStream extends DataOutputStream
         }
     }
 
-    public void writeLittleInt(int v) throws IOException
-    {
+    public void writeLittleInt(int v) throws IOException {
         out.write(v & 0xFF);
         out.write((v >>> 8) & 0xFF);
         out.write((v >>> 16) & 0xFF);
         out.write((v >>> 24) & 0xFF);
     }
 
-    public void writeLittleFloat(float v) throws IOException
-    {
+    public void writeLittleIntArray(int[] v) throws IOException {
+        for (int a : v) {
+            writeLittleInt(a);
+        }
+    }
+
+    public void writeLittleFloat(float v) throws IOException {
         writeLittleInt(Float.floatToIntBits(v));
     }
 
-    public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException
-    {
+    public void writeLittleFloatArray(float[] v) throws IOException {
+        for (float a : v) {
+            writeLittleFloat(a);
+        }
+    }
+
+    public void writePackedInts(int[] data, int count, int size, boolean signed) throws IOException {
         assert data.length >= count * size : "The data to be written is smaller"
                 + " as stated by other parameters. Needed: " + (count * size) + " Provided: " + data.length;
         // Allocate memory for interleaved array
@@ -82,81 +86,77 @@ public class CtmOutputStream extends DataOutputStream
                 if (signed) {
                     value = value < 0 ? -1 - (value << 1) : value << 1;
                 }
-                interleavedInsert(value, tmp, i, k, count, size);
+                interleavedInsert(value, tmp, i + k * count, count * size);
             }
         }
 
-        writeCompressed(tmp);
+        writeCompressedData(tmp);
     }
 
-    public void writePackedFloats(float[] data, int count, int size) throws IOException
-    {
+    public void writePackedFloats(float[] data, int count, int size) throws IOException {
         assert data.length >= count * size : "The data to be written is smaller"
                 + " as stated by other parameters. Needed: " + (count * size) + " Provided: " + data.length;
         // Allocate memory for interleaved array
         byte[] tmp = new byte[count * size * 4];
 
         // Convert floats to an interleaved array
-        for (int i = 0; i < count; ++i) {
-            for (int k = 0; k < size; ++k) {
-                int value = Float.floatToIntBits(data[i * size + k]);
-                interleavedInsert(value, tmp, i, k, count, size);
+        for (int x = 0; x < count; ++x) {
+            for (int y = 0; y < size; ++y) {
+                int value = Float.floatToIntBits(data[x * size + y]);
+                interleavedInsert(value, tmp, x + y * count, count * size);
             }
         }
-
-        writeCompressed(tmp);
+        writeCompressedData(tmp);
     }
 
-    private void interleavedInsert(int value, byte[] data, int x, int y, int width, int height)
-    {
-        data[x + y * width + 3 * width * height] = (byte) (value & 0xff);
-        data[x + y * width + 2 * width * height] = (byte) ((value >> 8) & 0xff);
-        data[x + y * width + width * height] = (byte) ((value >> 16) & 0xff);
-        data[x + y * width] = (byte) ((value >> 24) & 0xff);
+    public static void interleavedInsert(int value, byte[] data, int offset, int stride) {
+        data[offset + 3 * stride] = (byte) (value & 0xff);
+        data[offset + 2 * stride] = (byte) ((value >> 8) & 0xff);
+        data[offset + stride] = (byte) ((value >> 16) & 0xff);
+        data[offset] = (byte) ((value >> 24) & 0xff);
     }
 
-    private void writeCompressed(byte[] data) throws IOException
-    {
+    public void writeCompressedData(byte[] data) throws IOException {
         //some magic size as in the OpenCTM reference implementation
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000 + data.length);
 
         Encoder enc = new Encoder();
-        enc.setEndMarkerMode(true);
-        if (compressionLevel <= 5) {
-            enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
-        } else if (compressionLevel == 6) {
-            enc.setDictionarySize(1 << 25);
-        } else {
-            enc.setDictionarySize(1 << 26);
-        }
-        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
-
-        try (LzmaOutputStream lzout = new LzmaOutputStream(bout, new CustomWrapper(enc))) {
-            lzout.write(data);
-            lzout.flush();
-        }
+//        enc.setEndMarkerMode(true);
+//        if (compressionLevel <= 5) {
+//            enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
+//        } else if (compressionLevel == 6) {
+//            enc.setDictionarySize(1 << 25);
+//        } else {
+//            enc.setDictionarySize(1 << 26);
+//        }
+//        enc.setNumFastBytes(compressionLevel < 7 ? 32 : 64);
+//
+//            enc.setDictionarySize(1 << (14));
+        
+        enc.code(new ByteArrayInputStream(data), bout, data.length, -1, null);
+//        try (OutputStream lzout = new LzmaOutputStream(bout, new CustomWrapper(enc))) {
+//            lzout.write(data);
+//        }
 
         //This is the custom way of OpenCTM to write the LZMA properties
         this.writeLittleInt(bout.size());
         enc.writeCoderProperties(this);
         bout.writeTo(this);
+//        write(data);
     }
 
-    private static class CustomWrapper extends LzmaEncoderWrapper
-    {
+    private static class CustomWrapper extends LzmaEncoderWrapper {
 
         private final Encoder e;
 
-        public CustomWrapper(Encoder encoder)
-        {
+        CustomWrapper(Encoder encoder) {
             super(encoder);
             e = encoder;
         }
 
         @Override
-        public void code(InputStream in, OutputStream out) throws IOException
-        {
-            //both integer attributs aren't used inside the method
+        public void code(InputStream in, OutputStream out) throws IOException {
+            //both int attributs aren't used inside the method
             e.code(in, out, -1, -1, null);
         }
     }

@@ -12,20 +12,20 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
 package darwin.jopenctm.data;
 
 import darwin.jopenctm.errorhandling.InvalidDataException;
+import java.util.Arrays;
 
 /**
  *
  * @author daniel
  */
-public class Mesh
-{
+public class Mesh {
 
     public static final int CTM_ATTR_ELEMENT_COUNT = 4;
     public static final int CTM_NORMAL_ELEMENT_COUNT = 3;
@@ -39,8 +39,7 @@ public class Mesh
     // Multiple sets of custom vertex attribute maps (optional)
     public final AttributeData[] attributs;
 
-    public Mesh(float[] vertices, float[] normals, int[] indices, AttributeData[] texcoordinates, AttributeData[] attributs)
-    {
+    public Mesh(float[] vertices, float[] normals, int[] indices, AttributeData[] texcoordinates, AttributeData[] attributs) {
         this.vertices = vertices;
         this.normals = normals;
         this.indices = indices;
@@ -48,33 +47,27 @@ public class Mesh
         this.attributs = attributs;
     }
 
-    public int getVertexCount()
-    {
+    public int getVertexCount() {
         return vertices.length / CTM_POSITION_ELEMENT_COUNT;
     }
 
-    public int getUVCount()
-    {
+    public int getUVCount() {
         return texcoordinates.length;
     }
 
-    public int getAttrCount()
-    {
+    public int getAttrCount() {
         return attributs.length;
     }
 
-    public int getTriangleCount()
-    {
+    public int getTriangleCount() {
         return indices.length / 3;
     }
 
-    public boolean hasNormals()
-    {
+    public boolean hasNormals() {
         return normals != null;
     }
 
-    public float getAverageEdgeLength()
-    {
+    public float getAverageEdgeLength() {
         // Calculate the average edge length (Note: we actually sum up all the half-
         // edges, so in a proper solid mesh all connected edges are counted twice)
 
@@ -99,13 +92,12 @@ public class Mesh
         return totalLength / edgeCount;
     }
 
-    public void checkIntegrity() throws InvalidDataException
-    {
+    public void checkIntegrity() throws InvalidDataException {
         // Check that we have all the mandatory data
         if (vertices == null || indices == null || vertices.length < 1
-                || getTriangleCount() < 1) {
+            || getTriangleCount() < 1) {
             throw new InvalidDataException("The vertice or indice array is NULL"
-                    + " or has less then one element!");
+                                           + " or empty!");
         }
 
         if (indices.length % 3 != 0) {
@@ -116,7 +108,7 @@ public class Mesh
         for (int ind : indices) {
             if (ind >= vertices.length) {
                 throw new InvalidDataException("One element of the indice array "
-                        + "points to a none existing vertex(id: " + ind + ")");
+                                               + "points to a none existing vertex(id: " + ind + ")");
             }
         }
 
@@ -155,9 +147,46 @@ public class Mesh
         }
     }
 
-    private boolean isNotFinit(float value)
-    {
+    private boolean isNotFinit(float value) {
         Float v = value;
         return v.isInfinite() || v.isNaN();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + Arrays.hashCode(this.vertices);
+        hash = 67 * hash + Arrays.hashCode(this.normals);
+        hash = 67 * hash + Arrays.hashCode(this.indices);
+        hash = 67 * hash + Arrays.deepHashCode(this.texcoordinates);
+        hash = 67 * hash + Arrays.deepHashCode(this.attributs);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Mesh other = (Mesh) obj;
+        if (!Arrays.equals(this.vertices, other.vertices)) {
+            return false;
+        }
+        if (!Arrays.equals(this.normals, other.normals)) {
+            return false;
+        }
+        if (!Arrays.equals(this.indices, other.indices)) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.texcoordinates, other.texcoordinates)) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.attributs, other.attributs)) {
+            return false;
+        }
+        return true;
     }
 }

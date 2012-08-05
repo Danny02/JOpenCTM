@@ -5,17 +5,17 @@
 
     <groupId>org.darwin</groupId>
     <artifactId>JOpenCTM</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>   
+    <version>1.0</version>
+    <packaging>jar</packaging>
 
     <name>JOpenCTM</name>
-    
+
     <url>https://github.com/Danny02/JOpenCTM</url>
 
     <licenses>
         <license>
             <name>LGPL 3.0 License</name>
-            
+
             <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
         </license>
     </licenses>
@@ -38,13 +38,14 @@
             <url>https://github.com/Danny02</url>
             <id>Danny02</id>
         </developer>
-    </developers>  
-    
+    </developers>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
+                <version>2.0.5</version>
                 <executions>
                     <execution>
                         <id>process</id>
@@ -63,6 +64,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5</version>
                 <configuration>
                     <compilerArgument>-proc:none</compilerArgument>
                     <source>1.7</source>
@@ -80,18 +82,18 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.8.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jponge</groupId>
-            <artifactId>lzma-java</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>AnnotationsProcessing</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jponge</groupId>
+            <artifactId>lzma-java</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 
