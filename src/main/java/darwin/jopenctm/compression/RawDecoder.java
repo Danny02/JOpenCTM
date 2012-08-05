@@ -106,7 +106,7 @@ public class RawDecoder implements MeshDecoder
         String matname = in.readString();
         float[] data = readFloatArray(in, vertCount, CTM_UV_ELEMENT_COUNT);
 
-        return new AttributeData(name, matname, AttributeData.STANDART_UV_PRECISION, data);
+        return new AttributeData(name, matname, AttributeData.STANDARD_UV_PRECISION, data);
     }
 
     private AttributeData readAttrData(int vertCount, CtmInputStream in) throws IOException
@@ -114,7 +114,7 @@ public class RawDecoder implements MeshDecoder
         String name = in.readString();
         float[] data = readFloatArray(in, vertCount, CTM_ATTR_ELEMENT_COUNT);
 
-        return new AttributeData(name, null, AttributeData.STANDART_PRECISION, data);
+        return new AttributeData(name, null, AttributeData.STANDARD_PRECISION, data);
     }
 
     @Override
