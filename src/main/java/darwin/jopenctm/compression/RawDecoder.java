@@ -18,31 +18,32 @@
  */
 package darwin.jopenctm.compression;
 
-import darwin.jopenctm.data.AttributeData;
-import darwin.jopenctm.io.MeshInfo;
-import darwin.jopenctm.io.CtmInputStream;
-import java.io.IOException;
-
 import darwin.annotations.ServiceProvider;
+import darwin.jopenctm.data.AttributeData;
 import darwin.jopenctm.data.Mesh;
+import static darwin.jopenctm.data.Mesh.*;
 import darwin.jopenctm.errorhandling.BadFormatException;
 import darwin.jopenctm.errorhandling.InvalidDataException;
-
-import static darwin.jopenctm.io.CtmFileReader.*;
-import static darwin.jopenctm.data.Mesh.*;
+import static darwin.jopenctm.io.CtmFileReader.getTagInt;
+import static darwin.jopenctm.io.CtmFileReader.unpack;
+import darwin.jopenctm.io.CtmInputStream;
+import darwin.jopenctm.io.MeshInfo;
+import java.io.IOException;
 
 /**
  *
  * @author daniel
  */
 @ServiceProvider(MeshDecoder.class)
-public class RawDecoder implements MeshDecoder {
+public class RawDecoder implements MeshDecoder
+{
 
     public static final int RAW_TAG = getTagInt("RAW\0");
     public static final int FORMAT_VERSION = 5;
 
     @Override
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException {
+    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException
+    {
         int vc = minfo.getVertexCount();
 
         AttributeData[] tex = new AttributeData[minfo.getUvMapCount()];
@@ -73,22 +74,34 @@ public class RawDecoder implements MeshDecoder {
         return new Mesh(vertices, normals, indices, tex, att);
     }
 
-    protected void checkTag(int readTag, int expectedTag) throws BadFormatException {
+    protected void checkTag(int readTag, int expectedTag) throws BadFormatException
+    {
         if (readTag != expectedTag) {
             throw new BadFormatException("Instead of the expected data tag(\"" + unpack(expectedTag)
-                                         + "\") the tag(\"" + unpack(readTag) + "\") was read!");
+                    + "\") the tag(\"" + unpack(readTag) + "\") was read!");
         }
     }
 
-    protected int[] readIntArray(CtmInputStream in, int count, int size, boolean signed) throws IOException {
-        return in.readLittleIntArray(count * size);
+    protected int[] readIntArray(CtmInputStream in, int count, int size, boolean signed) throws IOException
+    {
+        int[] array = new int[count * size];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = in.readLittleInt();
+        }
+        return array;
     }
 
-    protected float[] readFloatArray(CtmInputStream in, int count, int size) throws IOException {
-        return in.readLittleFloatArray(count * size);
+    protected float[] readFloatArray(CtmInputStream in, int count, int size) throws IOException
+    {
+        float[] array = new float[count * size];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = in.readLittleFloat();
+        }
+        return array;
     }
 
-    private AttributeData readUVData(int vertCount, CtmInputStream in) throws IOException {
+    private AttributeData readUVData(int vertCount, CtmInputStream in) throws IOException
+    {
         String name = in.readString();
         String matname = in.readString();
         float[] data = readFloatArray(in, vertCount, CTM_UV_ELEMENT_COUNT);
@@ -96,7 +109,8 @@ public class RawDecoder implements MeshDecoder {
         return new AttributeData(name, matname, AttributeData.STANDARD_UV_PRECISION, data);
     }
 
-    private AttributeData readAttrData(int vertCount, CtmInputStream in) throws IOException {
+    private AttributeData readAttrData(int vertCount, CtmInputStream in) throws IOException
+    {
         String name = in.readString();
         float[] data = readFloatArray(in, vertCount, CTM_ATTR_ELEMENT_COUNT);
 
@@ -104,7 +118,8 @@ public class RawDecoder implements MeshDecoder {
     }
 
     @Override
-    public boolean isFormatSupported(int tag, int version) {
+    public boolean isFormatSupported(int tag, int version)
+    {
         return tag == RAW_TAG && version == FORMAT_VERSION;
     }
 }
