@@ -4,7 +4,7 @@
 
     <groupId>org.darwinsbox</groupId>
     <artifactId>JOpenCTM</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>JOpenCTM</name>
@@ -28,7 +28,8 @@
         <url>${project.url}</url>
         <connection>scm:git:git://github.com/Danny02/DarwinsBox.git</connection>
         <developerConnection>scm:git:git@github.com:Danny02/DarwinsBox.git</developerConnection>
-    </scm>
+      <tag>DarwinsBox-2.0</tag>
+  </scm>
 
     <developers>
         <developer>
