@@ -24,10 +24,11 @@
         <system>GitHub Issues</system>
     </issueManagement>
 
+    
     <scm>
-        <url>${project.url}</url>
-        <connection>scm:git:git://github.com/Danny02/DarwinsBox.git</connection>
-        <developerConnection>scm:git:git@github.com:Danny02/DarwinsBox.git</developerConnection>
+        <connection>scm:git:git@github.com:Danny02/JOpenCTM.git</connection>
+        <developerConnection>scm:git:git@github.com:Danny02/JOpenCTM.git</developerConnection>
+        <url>git@github.com:Danny02/JOpenCTM.git</url>
     </scm>
 
     <developers>
