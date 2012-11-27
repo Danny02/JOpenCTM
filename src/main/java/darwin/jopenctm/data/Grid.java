@@ -18,9 +18,10 @@
  */
 package darwin.jopenctm.data;
 
+import java.io.IOException;
+
 import darwin.jopenctm.io.CtmInputStream;
 import darwin.jopenctm.io.CtmOutputStream;
-import java.io.IOException;
 
 /**
  *
@@ -53,9 +54,6 @@ public class Grid {
         out.writeLittleFloatArray(min);
         out.writeLittleFloatArray(max);
         out.writeLittleIntArray(division);
-    }
-
-    public void readFromStream(CtmInputStream in) throws IOException {
     }
 
     public boolean checkIntegrity() {

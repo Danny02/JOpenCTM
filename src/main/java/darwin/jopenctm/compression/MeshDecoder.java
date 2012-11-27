@@ -26,7 +26,7 @@ import darwin.jopenctm.errorhandling.InvalidDataException;
 import darwin.jopenctm.io.CtmInputStream;
 import darwin.jopenctm.io.MeshInfo;
 
-import static darwin.jopenctm.io.CtmFileReader.*;
+import static darwin.jopenctm.io.CtmFileReader.getTagInt;
 
 /**
  *

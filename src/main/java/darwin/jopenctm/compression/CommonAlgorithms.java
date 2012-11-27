@@ -18,10 +18,12 @@
  */
 package darwin.jopenctm.compression;
 
-import darwin.jopenctm.data.Grid;
 import java.util.Arrays;
 
-import static darwin.jopenctm.data.Mesh.*;
+import darwin.jopenctm.data.Grid;
+
+import static darwin.jopenctm.data.Mesh.CTM_NORMAL_ELEMENT_COUNT;
+import static darwin.jopenctm.data.Mesh.CTM_POSITION_ELEMENT_COUNT;
 import static java.lang.Math.sqrt;
 
 /**

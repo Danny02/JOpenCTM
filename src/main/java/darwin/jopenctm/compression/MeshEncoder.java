@@ -20,8 +20,8 @@ package darwin.jopenctm.compression;
 
 import java.io.IOException;
 
-import darwin.jopenctm.io.CtmOutputStream;
 import darwin.jopenctm.data.Mesh;
+import darwin.jopenctm.io.CtmOutputStream;
 
 /**
  *

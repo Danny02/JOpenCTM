@@ -18,11 +18,12 @@
  */
 package darwin.jopenctm.compression;
 
+import java.io.IOException;
+
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.AttributeData;
 import darwin.jopenctm.data.Mesh;
 import darwin.jopenctm.io.CtmOutputStream;
-import java.io.IOException;
 
 import static darwin.jopenctm.compression.MeshDecoder.*;
 
