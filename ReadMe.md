@@ -1,3 +1,7 @@
-To compile this project you need to have build the AnnotaionProcessoing project from Darwins Box
+usage as a maven dependency:
 
-https://github.com/Danny02/DarwinsBox/tree/master/AnnotationsProcessing
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>JOpenCTM</artifactId>
+            <version>1.1</version>
+        </dependency>
