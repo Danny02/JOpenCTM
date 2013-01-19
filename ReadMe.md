@@ -14,16 +14,14 @@ To use the latest snap-shot build use this in your pom:
             <version>1.2-SNAPSHOT</version>
         </dependency>
         
-        <repositories>
-                <repository>
-                        <id>sonatype-nexus-snapshots</id>
-                        <name>Sonatype Nexus Snapshots</name>
-                        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                        <releases>
-                                <enabled>false</enabled>
-                        </releases>
-                        <snapshots>
-                                <enabled>true</enabled>
-                        </snapshots>
-                </repository>
-        </repositories>
+and also this repository:
+        
+        <repository>
+                <id>sonatype-nexus-snapshots</id>
+                <name>Sonatype Nexus Snapshots</name>
+                <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                <snapshots>
+                        <enabled>true</enabled>
+                </snapshots>
+        </repository>
+
