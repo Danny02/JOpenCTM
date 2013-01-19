@@ -9,6 +9,8 @@
         
 **To use the latest snap-shot build use this in your pom:**
 
+[![Build Status](https://danny02.ci.cloudbees.com/job/JOpenCTM/badge/icon)](https://danny02.ci.cloudbees.com/job/JOpenCTM/)
+
         <dependency>
             <groupId>com.github.danny02</groupId>
             <artifactId>JOpenCTM</artifactId>
