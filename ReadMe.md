@@ -1,4 +1,4 @@
-maven dependency:
+**maven dependency:**
 
         <dependency>
             <groupId>com.github.danny02</groupId>
@@ -6,7 +6,8 @@ maven dependency:
             <version>1.1</version>
         </dependency>
         
-To use the latest snap-shot build use this in your pom:
+        
+**To use the latest snap-shot build use this in your pom:**
 
         <dependency>
             <groupId>com.github.danny02</groupId>
