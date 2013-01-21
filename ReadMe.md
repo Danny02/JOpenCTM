@@ -1,3 +1,35 @@
-To compile this project you need to have build the AnnotaionProcessoing project from Darwins Box
+JOpenCTM
+=========
 
-https://github.com/Danny02/DarwinsBox/tree/master/AnnotationsProcessing
+Java implementation of the OpenCTM file-format.
+
+**maven dependency:**
+
+        <dependency>
+            <groupId>com.github.danny02</groupId>
+            <artifactId>JOpenCTM</artifactId>
+            <version>1.2</version>
+        </dependency>
+        
+        
+**To use the latest snap-shot build use this in your pom:**
+
+[![Build Status](https://danny02.ci.cloudbees.com/job/JOpenCTM/badge/icon)](https://danny02.ci.cloudbees.com/job/JOpenCTM/)
+
+        <dependency>
+            <groupId>com.github.danny02</groupId>
+            <artifactId>JOpenCTM</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+        
+and also this repository:
+        
+        <repository>
+                <id>sonatype-nexus-snapshots</id>
+                <name>Sonatype Nexus Snapshots</name>
+                <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                <snapshots>
+                        <enabled>true</enabled>
+                </snapshots>
+        </repository>
+
