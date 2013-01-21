@@ -20,13 +20,10 @@ package darwin.jopenctm.compression;
 
 import java.io.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import darwin.jopenctm.data.*;
+import darwin.jopenctm.io.*;
 
-import darwin.jopenctm.data.AttributeData;
-import darwin.jopenctm.data.Mesh;
-import darwin.jopenctm.io.CtmFileReader;
-import darwin.jopenctm.io.CtmFileWriter;
+import org.junit.*;
 
 import static org.junit.Assert.*;
 
