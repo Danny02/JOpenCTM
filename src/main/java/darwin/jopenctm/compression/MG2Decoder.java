@@ -18,12 +18,13 @@
  */
 package darwin.jopenctm.compression;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.*;
-import darwin.jopenctm.errorhandling.BadFormatException;
-import darwin.jopenctm.errorhandling.InvalidDataException;
+import darwin.jopenctm.errorhandling.*;
 import darwin.jopenctm.io.*;
-import java.io.IOException;
 
 import static darwin.jopenctm.compression.CommonAlgorithms.*;
 import static darwin.jopenctm.data.Mesh.*;

@@ -19,7 +19,7 @@
 package darwin.jopenctm.io;
 
 import java.io.*;
-import java.util.Arrays;
+
 import lzma.sdk.lzma.Decoder;
 import org.cservenak.streams.Coder;
 

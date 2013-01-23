@@ -21,10 +21,8 @@ package darwin.jopenctm.compression;
 import java.io.IOException;
 
 import darwin.jopenctm.data.Mesh;
-import darwin.jopenctm.errorhandling.BadFormatException;
-import darwin.jopenctm.errorhandling.InvalidDataException;
-import darwin.jopenctm.io.CtmInputStream;
-import darwin.jopenctm.io.MeshInfo;
+import darwin.jopenctm.errorhandling.*;
+import darwin.jopenctm.io.*;
 
 import static darwin.jopenctm.io.CtmFileReader.getTagInt;
 

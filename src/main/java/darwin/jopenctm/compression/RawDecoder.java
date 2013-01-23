@@ -18,17 +18,15 @@
  */
 package darwin.jopenctm.compression;
 
-import darwin.annotations.ServiceProvider;
-import darwin.jopenctm.data.AttributeData;
-import darwin.jopenctm.data.Mesh;
-import static darwin.jopenctm.data.Mesh.*;
-import darwin.jopenctm.errorhandling.BadFormatException;
-import darwin.jopenctm.errorhandling.InvalidDataException;
-import static darwin.jopenctm.io.CtmFileReader.getTagInt;
-import static darwin.jopenctm.io.CtmFileReader.unpack;
-import darwin.jopenctm.io.CtmInputStream;
-import darwin.jopenctm.io.MeshInfo;
 import java.io.IOException;
+
+import darwin.annotations.ServiceProvider;
+import darwin.jopenctm.data.*;
+import darwin.jopenctm.errorhandling.*;
+import darwin.jopenctm.io.*;
+
+import static darwin.jopenctm.data.Mesh.*;
+import static darwin.jopenctm.io.CtmFileReader.*;
 
 /**
  *

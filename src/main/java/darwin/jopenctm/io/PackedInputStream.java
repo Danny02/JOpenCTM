@@ -19,9 +19,9 @@
 package darwin.jopenctm.io;
 
 import java.io.*;
+
 import lzma.sdk.lzma.Decoder;
-import org.cservenak.streams.Coder;
-import org.cservenak.streams.CoderInputStream;
+import org.cservenak.streams.*;
 
 /**
  *

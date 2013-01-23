@@ -18,14 +18,12 @@
  */
 package darwin.jopenctm.io;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ServiceLoader;
 
 import darwin.jopenctm.compression.MeshDecoder;
 import darwin.jopenctm.data.Mesh;
-import darwin.jopenctm.errorhandling.BadFormatException;
-import darwin.jopenctm.errorhandling.InvalidDataException;
+import darwin.jopenctm.errorhandling.*;
 
 /**
  *

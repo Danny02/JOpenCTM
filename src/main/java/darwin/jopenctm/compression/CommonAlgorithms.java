@@ -22,8 +22,7 @@ import java.util.Arrays;
 
 import darwin.jopenctm.data.Grid;
 
-import static darwin.jopenctm.data.Mesh.CTM_NORMAL_ELEMENT_COUNT;
-import static darwin.jopenctm.data.Mesh.CTM_POSITION_ELEMENT_COUNT;
+import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.sqrt;
 
 /**

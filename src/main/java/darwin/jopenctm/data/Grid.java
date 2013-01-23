@@ -20,8 +20,7 @@ package darwin.jopenctm.data;
 
 import java.io.IOException;
 
-import darwin.jopenctm.io.CtmInputStream;
-import darwin.jopenctm.io.CtmOutputStream;
+import darwin.jopenctm.io.*;
 
 /**
  *

@@ -18,8 +18,7 @@
  */
 package darwin.jopenctm.io;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 import darwin.jopenctm.compression.MeshEncoder;
 import darwin.jopenctm.data.Mesh;
