@@ -18,8 +18,9 @@
  */
 package darwin.jopenctm.data;
 
-import darwin.jopenctm.errorhandling.InvalidDataException;
 import java.util.Arrays;
+
+import darwin.jopenctm.errorhandling.InvalidDataException;
 
 /**
  *
