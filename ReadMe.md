@@ -2,6 +2,7 @@ JOpenCTM
 =========
 
 Java implementation of the OpenCTM file-format.
+This library is licensed under the LGPL 3.0 License.
 
 **maven dependency:**
 
