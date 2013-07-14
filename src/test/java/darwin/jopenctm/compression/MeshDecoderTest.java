@@ -41,10 +41,30 @@ public class MeshDecoderTest {
             if (is == null) {
                 fail("couldn't load model Brunnen");
             }
-            float[] vertices = new float[]{0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0};
             int[] indices = new int[]{0, 1, 2, 0, 2, 3};
-            mesh = new Mesh(vertices, null, indices,
-                            new AttributeData[0], new AttributeData[0]);
+            float[] vertices = new float[]{0, 0, 0,
+                                           1, 0, 0,
+                                           1, 1, 0,
+                                           0, 1, 0};
+            float[] normals = new float[]{
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1
+            };
+
+            AttributeData[] uv = new AttributeData[]{
+                new AttributeData("uv1", "test", AttributeData.STANDARD_UV_PRECISION,
+                                  new float[]{
+                    0.01f, 0.6f,
+                    0.43f, 0.12f,
+                    0.9331f, 0.632f,
+                    0.141f, 0.823f
+                })
+            };
+
+            mesh = new Mesh(vertices, normals, indices,
+                             uv, new AttributeData[0]);
             mesh.checkIntegrity();
         }
     }
@@ -60,7 +80,7 @@ public class MeshDecoderTest {
 
         MG2Decoder dec = new MG2Decoder();
         dec.restoreIndices(ind.length / 3, ind);
-        
+
         assertArrayEquals(ind, mesh.indices);
     }
 
@@ -79,8 +99,19 @@ public class MeshDecoderTest {
 
     @Test
     public void testMG2Coder() throws Exception {
-        //test can not work, because the MG2 coding reorders triangles and does lossy compression
-//        testEncoder(new MG2Encoder());
+        MG2Encoder encoder = new MG2Encoder();
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            CtmFileWriter writer = new CtmFileWriter(out, encoder);
+            writer.encode(mesh, null);
+            out.flush();
+
+            try (InputStream iss = new ByteArrayInputStream(out.toByteArray())) {
+                CtmFileReader reader = new CtmFileReader(iss);
+
+                MG2MeshEqualsTest(encoder, mesh, reader.decode());
+            }
+        }
     }
 
     private void testEncoder(MeshEncoder encoder) throws Exception {
@@ -99,5 +130,77 @@ public class MeshDecoderTest {
                              mesh, loadedMesh);
             }
         }
+    }
+
+    private void MG2MeshEqualsTest(MG2Encoder enc, Mesh orig, Mesh read) {
+        assertEquals("Trianglecount differs", orig.getTriangleCount(), read.getTriangleCount());
+        assertEquals("Vertexcount differs", orig.getVertexCount(), read.getVertexCount());
+        assertEquals("Only one has normals", orig.hasNormals(), read.hasNormals());
+
+        Grid grid = enc.setupGrid(orig.vertices);
+        SortableVertex[] sorted = enc.sortVertices(grid, orig.vertices);
+        int[] indexLUT = new int[sorted.length];
+        for (int i = 0; i < sorted.length; ++i) {
+            indexLUT[sorted[i].originalIndex] = i;
+        }
+
+        for (int i = 0; i < orig.getVertexCount(); i++) {
+            int newIndex = indexLUT[i];
+
+            for (int e = 0; e < Mesh.CTM_POSITION_ELEMENT_COUNT; e++) {
+                assertTrue("positions not in precision", compare(orig.vertices[i * 3 + e],
+                                                                 read.vertices[newIndex * 3 + e],
+                                                                 enc.vertexPrecision * 2));
+            }
+            if (orig.hasNormals()) {
+                for (int e = 0; e < Mesh.CTM_NORMAL_ELEMENT_COUNT; e++) {
+                    assertTrue("normals not in precision", compare(orig.normals[i * 3 + e],
+                                                                   read.normals[newIndex * 3 + e],
+                                                                   enc.normalPrecision * 10));
+                }
+            }
+        }
+
+        testAttributeArrays(orig.texcoordinates, read.texcoordinates, indexLUT);
+        testAttributeArrays(orig.attributs, read.attributs, indexLUT);
+    }
+
+    private void testAttributeArrays(AttributeData[] a, AttributeData[] b, int[] indexLUT) {
+        if ((a == null || a.length == 0) && (b == null || b.length == 0)) {
+            return;
+        }
+
+        assertEquals(a.length, b.length);
+
+        for (int i = 0; i < a.length; i++) {
+            assertEquals(a[i].materialName, b[i].materialName);
+            assertEquals(a[i].name, b[i].name);
+            assertEquals(a[i].precision, b[i].precision, 0);
+
+            float[] orig = a[i].values;
+            float[] read = b[i].values;
+
+            assertEquals(orig.length, read.length);
+
+            int count = orig.length / indexLUT.length;
+
+            assertEquals(count * indexLUT.length, orig.length);
+
+
+            for (int vi = 0; vi < indexLUT.length; vi++) {
+                int newIndex = indexLUT[vi];
+
+                for (int e = 0; e < count; e++) {
+                    assertTrue("Attributs not in precision", compare(orig[vi * count + e],
+                                                                     read[newIndex * count + e],
+                                                                     a[i].precision * 2));
+                }
+            }
+
+        }
+    }
+
+    private boolean compare(float a, float b, float precision) {
+        return Math.abs(a - b) < precision;
     }
 }

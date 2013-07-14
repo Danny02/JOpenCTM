@@ -29,14 +29,12 @@ import static java.lang.Math.sqrt;
  *
  * @author daniel
  */
-public class CommonAlgorithms
-{
+public class CommonAlgorithms {
 
     /**
      * Calculate inverse derivatives of the vertices.
      */
-    public static float[] restoreVertices(int[] intVertices, int[] gridIndices, Grid grid, float vertexPrecision)
-    {
+    public static float[] restoreVertices(int[] intVertices, int[] gridIndices, Grid grid, float vertexPrecision) {
         int ve = CTM_POSITION_ELEMENT_COUNT;
         int vc = intVertices.length / ve;
 
@@ -66,8 +64,7 @@ public class CommonAlgorithms
     /**
      * Convert a grid index to a point (the min x/y/z for the given grid box).
      */
-    public static float[] gridIdxToPoint(Grid grid, int idx)
-    {
+    public static float[] gridIdxToPoint(Grid grid, int idx) {
         int[] gridIdx = new int[3];
 
         int ydiv = grid.getDivision()[0];
@@ -91,8 +88,7 @@ public class CommonAlgorithms
      * Calculate the smooth normals for a given mesh. These are used as the
      * nominal normals for normal deltas & reconstruction.
      */
-    public static float[] calcSmoothNormals(float[] vertices, int[] indices)
-    {
+    public static float[] calcSmoothNormals(float[] vertices, int[] indices) {
         int vc = vertices.length / CTM_POSITION_ELEMENT_COUNT;
         int tc = indices.length / 3;
         float[] smoothNormals = new float[vc * CTM_NORMAL_ELEMENT_COUNT];//no setting to 0 needed in Java compared to C
@@ -100,7 +96,7 @@ public class CommonAlgorithms
         // Calculate sums of all neighboring triangle normals for each vertex
         for (int i = 0; i < tc; ++i) {
             // Get triangle corner indices
-            int[] tri = Arrays.copyOfRange(indices, i*3, i*3+3);
+            int[] tri = Arrays.copyOfRange(indices, i * 3, i * 3 + 3);
 
             // Calculate the normalized cross product of two triangle edges (i.e. the
             // flat triangle normal)
@@ -135,8 +131,8 @@ public class CommonAlgorithms
         // Normalize the normal sums, which gives the unit length smooth normals
         for (int i = 0; i < vc; ++i) {
             float len = (float) sqrt(smoothNormals[i * 3] * smoothNormals[i * 3]
-                    + smoothNormals[i * 3 + 1] * smoothNormals[i * 3 + 1]
-                    + smoothNormals[i * 3 + 2] * smoothNormals[i * 3 + 2]);
+                                     + smoothNormals[i * 3 + 1] * smoothNormals[i * 3 + 1]
+                                     + smoothNormals[i * 3 + 2] * smoothNormals[i * 3 + 2]);
             if (len > 1e-10f) {
                 len = 1.0f / len;
             } else {
@@ -159,8 +155,7 @@ public class CommonAlgorithms
      * normal, this routine needs to be fast. The current implementation uses:
      * 12 MUL, 1 DIV, 1 SQRT, ~6 ADD.
      */
-    public static float[] makeNormalCoordSys(float[] normals, int offset)
-    {
+    public static float[] makeNormalCoordSys(float[] normals, int offset) {
 
         float[] m = new float[9];
         m[6] = normals[offset];

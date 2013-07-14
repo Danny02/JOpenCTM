@@ -48,7 +48,7 @@ public class MG2Encoder extends MG1Encoder {
                && CTM_ATTR_ELEMENT_COUNT == 4 :
                 "This Class is not compatible to this version of the Lib!";
     }
-    private final float vertexPrecision, normalPrecision;
+    public final float vertexPrecision, normalPrecision;
 
     public MG2Encoder(float vertexPrecision, float normalPrecision) {
         this.vertexPrecision = vertexPrecision;
@@ -92,8 +92,13 @@ public class MG2Encoder extends MG1Encoder {
         out.writeLittleInt(INDX);
         int[] indices = reIndexIndices(sorted, m.indices);
         rearrangeTriangles(indices);
-        makeIndexDeltas(indices);
-        out.writePackedInts(indices, m.getTriangleCount(), 3, false);
+
+        //write indieces
+        {
+            int[] deltas = indices.clone();
+            makeIndexDeltas(deltas);
+            out.writePackedInts(deltas, m.getTriangleCount(), 3, false);
+        }
 
         if (m.hasNormals()) {
 
@@ -128,7 +133,7 @@ public class MG2Encoder extends MG1Encoder {
     /**
      * Setup the 3D space subdivision grid.
      */
-    private Grid setupGrid(float[] vertices) {
+    public Grid setupGrid(float[] vertices) {
         int vc = vertices.length / 3;
         //CTM_POSITION_ELEMENT_COUNT == 3
         // Calculate the mesh boundinggrid. box
@@ -198,7 +203,7 @@ public class MG2Encoder extends MG1Encoder {
         return idx[0] + grid.getDivision()[0] * (idx[1] + grid.getDivision()[1] * idx[2]);
     }
 
-    private SortableVertex[] sortVertices(Grid grid, float[] v) {
+    public SortableVertex[] sortVertices(Grid grid, float[] v) {
         // Prepare sort vertex array
         int vc = v.length / CTM_POSITION_ELEMENT_COUNT;
         SortableVertex[] sortVertices = new SortableVertex[vc];
@@ -291,43 +296,46 @@ public class MG2Encoder extends MG1Encoder {
         int[] intNormals = new int[vc * CTM_NORMAL_ELEMENT_COUNT];
         for (int i = 0; i < vc; ++i) {
             // Get old normal index (before vertex sorting)
-            int oldIdx = sortVertices[i].originalIndex;
+            int oldIdx = sortVertices[i].originalIndex * Mesh.CTM_NORMAL_ELEMENT_COUNT;
+            int newIdx = i * Mesh.CTM_NORMAL_ELEMENT_COUNT;
 
             // Calculate normal magnitude (should always be 1.0 for unit length normals)
-            float magn = (float) sqrt(normals[oldIdx * 3] * normals[oldIdx * 3]
-                                      + normals[oldIdx * 3 + 1] * normals[oldIdx * 3 + 1]
-                                      + normals[oldIdx * 3 + 2] * normals[oldIdx * 3 + 2]);
+            float magn = (float) sqrt(normals[oldIdx] * normals[oldIdx]
+                                      + normals[oldIdx + 1] * normals[oldIdx + 1]
+                                      + normals[oldIdx + 2] * normals[oldIdx + 2]);
             if (magn < 1e-10f) {
                 magn = 1.0f;
             }
 
             // Invert magnitude if the normal is negative compared to the predicted
             // smooth normal
-            if ((smoothNormals[i * 3] * normals[oldIdx * 3]
-                 + smoothNormals[i * 3 + 1] * normals[oldIdx * 3 + 1]
-                 + smoothNormals[i * 3 + 2] * normals[oldIdx * 3 + 2]) < 0.0f) {
+            if ((smoothNormals[newIdx] * normals[oldIdx]
+                 + smoothNormals[newIdx + 1] * normals[oldIdx + 1]
+                 + smoothNormals[newIdx + 2] * normals[oldIdx + 2]) < 0.0f) {
                 magn = -magn;
             }
 
             // Store the magnitude in the first element of the three normal elements
-            intNormals[i * 3] = (int) floor(scale * magn + 0.5f);
+            intNormals[newIdx] = (int) floor(scale * magn + 0.5f);
 
             // Normalize the normal (1 / magn) - and flip it if magn < 0
             magn = 1.0f / magn;
             float[] n = new float[3];
             for (int j = 0; j < 3; ++j) {
-                n[j] = normals[oldIdx * 3 + j] * magn;
+                n[j] = normals[oldIdx + j] * magn;
             }
 
             // Convert the normal to angular representation (phi, theta) in a coordinate
             // system where the nominal (smooth) normal is the Z-axis
-            float[] basisAxes = makeNormalCoordSys(smoothNormals, i * 3);
+            float[] basisAxes = makeNormalCoordSys(smoothNormals, newIdx);
             float[] n2 = new float[3];
             for (int j = 0; j < 3; ++j) {
-                n2[j] = basisAxes[j * 3] * n[0]
-                        + basisAxes[j * 3 + 1] * n[1]
-                        + basisAxes[j * 3 + 2] * n[2];
+                int id = j * Mesh.CTM_NORMAL_ELEMENT_COUNT;
+                n2[j] = basisAxes[id] * n[0]
+                        + basisAxes[id + 1] * n[1]
+                        + basisAxes[id + 2] * n[2];
             }
+
             double phi, theta, thetaScale;
             if (n2[2] >= 1.0f) {
                 phi = 0.0f;
@@ -346,8 +354,8 @@ public class MG2Encoder extends MG1Encoder {
             } else {
                 thetaScale = intPhi / (2.0 * PI);
             }
-            intNormals[i * 3 + 1] = intPhi;
-            intNormals[i * 3 + 2] = (int) floor((theta + PI) * thetaScale + 0.5f);
+            intNormals[newIdx + 1] = intPhi;
+            intNormals[newIdx + 2] = (int) floor((theta + PI) * thetaScale + 0.5f);
         }
         return intNormals;
     }
