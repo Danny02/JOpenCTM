@@ -9,7 +9,7 @@ This library is licensed under the LGPL 3.0 License.
         <dependency>
             <groupId>com.github.danny02</groupId>
             <artifactId>JOpenCTM</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
         
         
@@ -20,7 +20,7 @@ This library is licensed under the LGPL 3.0 License.
         <dependency>
             <groupId>com.github.danny02</groupId>
             <artifactId>JOpenCTM</artifactId>
-            <version>1.3-SNAPSHOT</version>
+            <version>1.4-SNAPSHOT</version>
         </dependency>
         
 and also this repository:
