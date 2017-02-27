@@ -121,7 +121,7 @@ public class CtmOutputStream extends DataOutputStream {
         ByteArrayOutputStream bout = new ByteArrayOutputStream(1000 + data.length);
 
         Encoder enc = new Encoder();
-        enc.setEndMarkerMode(true);
+        enc.setEndMarkerMode(false);
         if (compressionLevel <= 5) {
             enc.setDictionarySize(1 << (compressionLevel * 2 + 14));
         } else if (compressionLevel == 6) {
