@@ -26,13 +26,18 @@ import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.sqrt;
 
 /**
- *
  * @author daniel
  */
 public class CommonAlgorithms {
 
     /**
      * Calculate inverse derivatives of the vertices.
+     *
+     * @param intVertices encoded vertices
+     * @param gridIndices index of the used index
+     * @param grid grid definition
+     * @param vertexPrecision used encoding precision
+     * @return the restored vertices
      */
     public static float[] restoreVertices(int[] intVertices, int[] gridIndices, Grid grid, float vertexPrecision) {
         int ve = CTM_POSITION_ELEMENT_COUNT;
@@ -62,7 +67,11 @@ public class CommonAlgorithms {
     }
 
     /**
-     * Convert a grid index to a point (the min x/y/z for the given grid box).
+     * Convert a grid index to a point.
+     *
+     * @param grid gird box definition
+     * @param idx  box id
+     * @return the min x/y/z for the given grid box (an array with size of 3)
      */
     public static float[] gridIdxToPoint(Grid grid, int idx) {
         int[] gridIdx = new int[3];
@@ -86,7 +95,11 @@ public class CommonAlgorithms {
 
     /**
      * Calculate the smooth normals for a given mesh. These are used as the
-     * nominal normals for normal deltas & reconstruction.
+     * nominal normals for normal deltas and reconstruction.
+     *
+     * @param vertices vertex coordinate values
+     * @param indices  vertex indices
+     * @return smoothed normals
      */
     public static float[] calcSmoothNormals(float[] vertices, int[] indices) {
         int vc = vertices.length / CTM_POSITION_ELEMENT_COUNT;
@@ -131,8 +144,8 @@ public class CommonAlgorithms {
         // Normalize the normal sums, which gives the unit length smooth normals
         for (int i = 0; i < vc; ++i) {
             float len = (float) sqrt(smoothNormals[i * 3] * smoothNormals[i * 3]
-                                     + smoothNormals[i * 3 + 1] * smoothNormals[i * 3 + 1]
-                                     + smoothNormals[i * 3 + 2] * smoothNormals[i * 3 + 2]);
+                    + smoothNormals[i * 3 + 1] * smoothNormals[i * 3 + 1]
+                    + smoothNormals[i * 3 + 2] * smoothNormals[i * 3 + 2]);
             if (len > 1e-10f) {
                 len = 1.0f / len;
             } else {
@@ -148,12 +161,20 @@ public class CommonAlgorithms {
 
     /**
      * Create an ortho-normalized coordinate system where the Z-axis is aligned
-     * with the given normal. Note 1: This function is central to how the
+     * with the given normal.
+     * <p>
+     * Note 1: This function is central to how the
      * compressed normal data is interpreted, and it can not be changed
      * (mathematically) without making the coder/decoder incompatible with other
-     * versions of the library! Note 2: Since we do this for every single
+     * versions of the library!
+     * <p>
+     * Note 2: Since we do this for every single
      * normal, this routine needs to be fast. The current implementation uses:
      * 12 MUL, 1 DIV, 1 SQRT, ~6 ADD.
+     *
+     * @param normals the normal array, consecutive x,y,z coordinates
+     * @param offset offset into the normal array
+     * @return a 3x3 matrix defining the nroaml coordinate system
      */
     public static float[] makeNormalCoordSys(float[] normals, int offset) {
 

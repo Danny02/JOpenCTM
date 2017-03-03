@@ -19,7 +19,6 @@
 package darwin.jopenctm.compression;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import darwin.annotations.ServiceProvider;
 import darwin.jopenctm.data.*;
@@ -73,12 +72,12 @@ public class MG2Decoder extends MG1Decoder {
             uvData[i] = readUvData(in, vc);
         }
 
-        AttributeData[] attributs = new AttributeData[minfo.getAttrCount()];
-        for (int i = 0; i < attributs.length; i++) {
-            attributs[i] = readAttribute(in, vc);
+        AttributeData[] attributes = new AttributeData[minfo.getAttrCount()];
+        for (int i = 0; i < attributes.length; i++) {
+            attributes[i] = readAttribute(in, vc);
         }
 
-        return new Mesh(vertices, normals, indices, uvData, attributs);
+        return new Mesh(vertices, normals, indices, uvData, attributes);
     }
 
     private float[] readVertices(CtmInputStream in, Grid grid, int vcount, float precision) throws IOException, BadFormatException {
@@ -100,7 +99,7 @@ public class MG2Decoder extends MG1Decoder {
         restoreIndices(triCount, indices);
         for (int i : indices) {
             if (i > vcount) {
-                throw new InvalidDataException("One element of the indice array "
+                throw new InvalidDataException("One element of the indices array "
                                                + "points to a none existing vertex(id: " + i + ")");
             }
         }

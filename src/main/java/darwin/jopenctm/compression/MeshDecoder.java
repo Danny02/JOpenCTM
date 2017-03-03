@@ -33,13 +33,13 @@ import static darwin.jopenctm.io.CtmFileReader.getTagInt;
 public interface MeshDecoder
 {
 
-    public static final int INDX = getTagInt("INDX");
-    public static final int VERT = getTagInt("VERT");
-    public static final int NORM = getTagInt("NORM");
-    public static final int TEXC = getTagInt("TEXC");
-    public static final int ATTR = getTagInt("ATTR");
+    int INDX = getTagInt("INDX");
+    int VERT = getTagInt("VERT");
+    int NORM = getTagInt("NORM");
+    int TEXC = getTagInt("TEXC");
+    int ATTR = getTagInt("ATTR");
 
-    public Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException;
+    Mesh decode(MeshInfo minfo, CtmInputStream in) throws IOException, BadFormatException, InvalidDataException;
 
-    public boolean isFormatSupported(int tag, int version);
+    boolean isFormatSupported(int tag, int version);
 }

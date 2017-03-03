@@ -47,9 +47,10 @@ public class CtmInputStream extends DataInputStream {
     }
 
     /**
-     * reads a single Integer value, in little edian order
-     * <p/>
-     * @return < p/> @throws IOException
+     * reads a single integer value, in little endian order
+     *
+     * @return read integer value
+     * @throws IOException see {@link InputStream#read()}
      */
     public int readLittleInt() throws IOException {
         int ch1 = read();
@@ -71,12 +72,11 @@ public class CtmInputStream extends DataInputStream {
     }
 
     /**
-     * Reads floating point type stored in little endian (see readFloat() for
-     * big endian)
-     * <p/>
-     * @return float value translated from little endian
-     * <p/>
-     * @throws IOException if an IO error occurs
+     * Reads floating point number stored in little endian
+     *
+     * @return read float value
+     * @throws IOException see {@link InputStream#read()}
+     * @see CtmInputStream#readFloat()
      */
     public final float readLittleFloat() throws IOException {
         return Float.intBitsToFloat(readLittleInt());
@@ -96,7 +96,7 @@ public class CtmInputStream extends DataInputStream {
         // Convert interleaved array to integers
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
-                int value = interleavedRetrive(tmp, i + k * count, count * size);
+                int value = interleavedRetrieve(tmp, i + k * count, count * size);
                 if (signed) {
                     long x = ((long) value) & 0xFFFFFFFFL;//not sure if correct
                     value = (x & 1) != 0 ? -(int) ((x + 1) >> 1) : (int) (x >> 1);
@@ -113,7 +113,7 @@ public class CtmInputStream extends DataInputStream {
         // Convert interleaved array to floats
         for (int i = 0; i < count; ++i) {
             for (int k = 0; k < size; ++k) {
-                int value = interleavedRetrive(tmp, i + k * count, count * size);
+                int value = interleavedRetrieve(tmp, i + k * count, count * size);
                 data[i * size + k] = Float.intBitsToFloat(value);
             }
         }
@@ -139,7 +139,7 @@ public class CtmInputStream extends DataInputStream {
         return data;
     }
 
-    public static int interleavedRetrive(byte[] data, int offset, int stride) {
+    public static int interleavedRetrieve(byte[] data, int offset, int stride) {
         byte b1 = data[offset + 3 * stride];
         byte b2 = data[offset + 2 * stride];
         byte b3 = data[offset + 1 * stride];

@@ -40,7 +40,7 @@ public class RawEncoder implements MeshEncoder
         int vc = m.getVertexCount();
 
         out.writeLittleInt(INDX);
-        writeIndicies(m.indices, out);
+        writeIndices(m.indices, out);
 
         out.writeLittleInt(VERT);
         writeFloatArray(m.vertices, out, vc * 3, 1);
@@ -58,14 +58,14 @@ public class RawEncoder implements MeshEncoder
             writeFloatArray(ad.values, out, vc, 2);
         }
 
-        for (AttributeData ad : m.attributs) {
+        for (AttributeData ad : m.attributes) {
             out.writeLittleInt(ATTR);
             out.writeString(ad.name);
             writeFloatArray(ad.values, out, vc, 4);
         }
     }
 
-    protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException
+    protected void writeIndices(int[] indices, CtmOutputStream out) throws IOException
     {
         out.writeLittleIntArray(indices);
     }

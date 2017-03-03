@@ -44,7 +44,7 @@ public class MG1Encoder extends RawEncoder {
     }
 
     @Override
-    protected void writeIndicies(int[] indices, CtmOutputStream out) throws IOException {
+    protected void writeIndices(int[] indices, CtmOutputStream out) throws IOException {
         int[] tmp = new int[indices.length];
         System.arraycopy(indices, 0, tmp, 0, tmp.length);
         rearrangeTriangles(tmp);
@@ -54,6 +54,8 @@ public class MG1Encoder extends RawEncoder {
 
     /**
      * Re-arrange all triangles for optimal compression.
+     *
+     * @param indices index data to reorder in place
      */
     public void rearrangeTriangles(int[] indices) {
         assert indices.length % 3 == 0;
@@ -90,6 +92,8 @@ public class MG1Encoder extends RawEncoder {
 
     /**
      * Calculate various forms of derivatives in order to reduce data entropy.
+     *
+     * @param indices index data to encode in place
      */
     public void makeIndexDeltas(int[] indices) {
         assert indices.length % 3 == 0;
