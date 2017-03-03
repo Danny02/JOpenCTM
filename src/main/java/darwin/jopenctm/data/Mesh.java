@@ -38,14 +38,14 @@ public class Mesh {
     // Multiple sets of UV coordinate maps (optional)
     public final AttributeData[] texcoordinates;
     // Multiple sets of custom vertex attribute maps (optional)
-    public final AttributeData[] attributs;
+    public final AttributeData[] attributes;
 
-    public Mesh(float[] vertices, float[] normals, int[] indices, AttributeData[] texcoordinates, AttributeData[] attributs) {
+    public Mesh(float[] vertices, float[] normals, int[] indices, AttributeData[] texcoordinates, AttributeData[] attributes) {
         this.vertices = vertices;
         this.normals = normals;
         this.indices = indices;
         this.texcoordinates = texcoordinates;
-        this.attributs = attributs;
+        this.attributes = attributes;
     }
 
     public int getVertexCount() {
@@ -57,7 +57,7 @@ public class Mesh {
     }
 
     public int getAttrCount() {
-        return attributs.length;
+        return attributes.length;
     }
 
     public int getTriangleCount() {
@@ -103,15 +103,15 @@ public class Mesh {
         }
 
         if (indices.length % 3 != 0) {
-            throw new InvalidDataException("The indice array size is not a multible of three!");
+            throw new InvalidDataException("The indices array size is not a multiple of three!");
         }
 
         if (vertices.length % CTM_POSITION_ELEMENT_COUNT != 0) {
-            throw new InvalidDataException("The vertex array size is not a multible of CTM_POSITION_ELEMENT_COUNT!");
+            throw new InvalidDataException("The vertex array size is not a multiple of CTM_POSITION_ELEMENT_COUNT!");
         }
 
         if (normals != null && normals.length % CTM_NORMAL_ELEMENT_COUNT != 0) {
-            throw new InvalidDataException("The normal array size is not a multible of CTM_NORMAL_ELEMENT_COUNT!");
+            throw new InvalidDataException("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT!");
         }
         if (normals != null && normals.length / CTM_NORMAL_ELEMENT_COUNT != getVertexCount()) {
             throw new InvalidDataException("There aren't the same number of normals as vertices");
@@ -120,23 +120,23 @@ public class Mesh {
         // Check that all indices are within range
         for (int ind : indices) {
             if (ind >= getVertexCount()) {
-                throw new InvalidDataException("One element of the indice array "
+                throw new InvalidDataException("One element of the indices array "
                                                + "points to a none existing vertex(id: " + ind + ")");
             }
         }
 
         // Check that all vertices are finite (non-NaN, non-inf)
         for (float v : vertices) {
-            if (isNotFinit(v)) {
-                throw new InvalidDataException("One of the vertice values is not finit!");
+            if (isNotFinite(v)) {
+                throw new InvalidDataException("One of the vertices values is not finite!");
             }
         }
 
         // Check that all normals are finite (non-NaN, non-inf)
         if (normals != null) {
             for (float n : normals) {
-                if (isNotFinit(n)) {
-                    throw new InvalidDataException("One of the normal values is not finit!");
+                if (isNotFinite(n)) {
+                    throw new InvalidDataException("One of the normal values is not finite!");
                 }
             }
         }
@@ -144,13 +144,13 @@ public class Mesh {
         // Check that all UV maps are finite (non-NaN, non-inf)
         for (AttributeData map : texcoordinates) {
             for (float v : map.values) {
-                if (isNotFinit(v)) {
-                    throw new InvalidDataException("One of the texcoord values is not finit!");
+                if (isNotFinite(v)) {
+                    throw new InvalidDataException("One of the texcoord values is not finite!");
                 }
             }
 
             if (map.values.length % CTM_UV_ELEMENT_COUNT != 0) {
-                throw new InvalidDataException("The uv values size is not a multible of CTM_UV_ELEMENT_COUNT!");
+                throw new InvalidDataException("The uv values size is not a multiple of CTM_UV_ELEMENT_COUNT!");
             }
             if (map.values.length / CTM_UV_ELEMENT_COUNT != getVertexCount()) {
                 throw new InvalidDataException("There aren't the same number of uv values as vertices");
@@ -158,15 +158,15 @@ public class Mesh {
         }
 
         // Check that all attribute maps are finite (non-NaN, non-inf)
-        for (AttributeData map : attributs) {
+        for (AttributeData map : attributes) {
             for (float v : map.values) {
-                if (isNotFinit(v)) {
-                    throw new InvalidDataException("One of the attribute values is not finit!");
+                if (isNotFinite(v)) {
+                    throw new InvalidDataException("One of the attribute values is not finite!");
                 }
             }
 
             if (map.values.length % CTM_ATTR_ELEMENT_COUNT != 0) {
-                throw new InvalidDataException("The generic attribute values size is not a multible of CTM_ATTR_ELEMENT_COUNT!");
+                throw new InvalidDataException("The generic attribute values size is not a multiple of CTM_ATTR_ELEMENT_COUNT!");
             }
             if (map.values.length / CTM_ATTR_ELEMENT_COUNT != getVertexCount()) {
                 throw new InvalidDataException("There aren't the same number of attribute values as vertices");
@@ -174,7 +174,7 @@ public class Mesh {
         }
     }
 
-    private boolean isNotFinit(float value) {
+    private boolean isNotFinite(float value) {
         Float v = value;
         return v.isInfinite() || v.isNaN();
     }
@@ -186,7 +186,7 @@ public class Mesh {
         hash = 67 * hash + Arrays.hashCode(this.normals);
         hash = 67 * hash + Arrays.hashCode(this.indices);
         hash = 67 * hash + Arrays.deepHashCode(this.texcoordinates);
-        hash = 67 * hash + Arrays.deepHashCode(this.attributs);
+        hash = 67 * hash + Arrays.deepHashCode(this.attributes);
         return hash;
     }
 
@@ -211,7 +211,7 @@ public class Mesh {
         if (!Arrays.deepEquals(this.texcoordinates, other.texcoordinates)) {
             return false;
         }
-        if (!Arrays.deepEquals(this.attributs, other.attributs)) {
+        if (!Arrays.deepEquals(this.attributes, other.attributes)) {
             return false;
         }
         return true;

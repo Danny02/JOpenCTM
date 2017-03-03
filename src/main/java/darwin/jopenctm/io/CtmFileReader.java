@@ -98,8 +98,9 @@ public class CtmFileReader
     /**
      * before calling this method the first time, the decode method has to be
      * called.
-     * <p/>
-     * @throws RuntimeExceptio- if the file wasn't decoded before.
+     *
+     * @return the comment of the CTM file
+     * @throws RuntimeException if the file wasn't decoded before.
      */
     public String getFileComment()
     {

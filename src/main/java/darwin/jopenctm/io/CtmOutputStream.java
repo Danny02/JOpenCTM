@@ -154,7 +154,7 @@ public class CtmOutputStream extends DataOutputStream {
 
         @Override
         public void code(InputStream in, OutputStream out) throws IOException {
-            //both int attributs aren't used inside the method
+            //both int attributes aren't used inside the method
             e.code(in, out, -1, -1, null);
         }
     }

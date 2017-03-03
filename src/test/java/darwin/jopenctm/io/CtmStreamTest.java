@@ -109,7 +109,7 @@ public class CtmStreamTest {
         for(int d : data)
         {
             CtmOutputStream.interleavedInsert(d, tmp, 0, 1);
-            int val = CtmInputStream.interleavedRetrive(tmp, 0, 1);
+            int val = CtmInputStream.interleavedRetrieve(tmp, 0, 1);
             assertEquals(val, d);
         }        
     }

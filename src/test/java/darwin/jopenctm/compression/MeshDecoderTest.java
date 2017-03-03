@@ -70,7 +70,7 @@ public class MeshDecoderTest {
     }
 
     @Test
-    public void testMG1IndicePacking() {
+    public void testMG1IndicesPacking() {
         int[] ind = new int[mesh.indices.length];
         System.arraycopy(mesh.indices, 0, ind, 0, mesh.indices.length);
 
@@ -162,7 +162,7 @@ public class MeshDecoderTest {
         }
 
         testAttributeArrays(orig.texcoordinates, read.texcoordinates, indexLUT);
-        testAttributeArrays(orig.attributs, read.attributs, indexLUT);
+        testAttributeArrays(orig.attributes, read.attributes, indexLUT);
     }
 
     private void testAttributeArrays(AttributeData[] a, AttributeData[] b, int[] indexLUT) {
@@ -191,7 +191,7 @@ public class MeshDecoderTest {
                 int newIndex = indexLUT[vi];
 
                 for (int e = 0; e < count; e++) {
-                    assertTrue("Attributs not in precision", compare(orig[vi * count + e],
+                    assertTrue("Attributes not in precision", compare(orig[vi * count + e],
                                                                      read[newIndex * count + e],
                                                                      a[i].precision * 2));
                 }

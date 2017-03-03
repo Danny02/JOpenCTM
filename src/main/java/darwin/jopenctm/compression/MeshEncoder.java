@@ -30,9 +30,9 @@ import darwin.jopenctm.io.CtmOutputStream;
 public interface MeshEncoder
 {
 
-    public void encode(Mesh m, CtmOutputStream out) throws IOException;
+    void encode(Mesh m, CtmOutputStream out) throws IOException;
 
-    public int getTag();
+    int getTag();
 
-    public int getFormatVersion();
+    int getFormatVersion();
 }
