@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
@@ -32,7 +32,6 @@ import static darwin.jopenctm.io.CtmFileReader.getTagInt;
  */
 public interface MeshDecoder
 {
-
     int INDX = getTagInt("INDX");
     int VERT = getTagInt("VERT");
     int NORM = getTagInt("NORM");

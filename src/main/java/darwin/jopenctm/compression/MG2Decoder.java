@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
@@ -97,12 +97,6 @@ public class MG2Decoder extends MG1Decoder {
         checkTag(in.readLittleInt(), INDX);
         int[] indices = in.readPackedInts(triCount, 3, false);
         restoreIndices(triCount, indices);
-        for (int i : indices) {
-            if (i > vcount) {
-                throw new InvalidDataException("One element of the indices array "
-                                               + "points to a none existing vertex(id: " + i + ")");
-            }
-        }
         return indices;
     }
 

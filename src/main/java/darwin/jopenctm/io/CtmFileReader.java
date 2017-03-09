@@ -12,7 +12,7 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this library.  If not, see <http://www.gnu.org/licenses/> 
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc., 51 Franklin Street,
  * Fifth Floor, Boston, MA 02110-1301  USA.
  */
@@ -44,6 +44,13 @@ public class CtmFileReader
     }
 
     public Mesh decode() throws IOException, BadFormatException, InvalidDataException
+    {
+        Mesh mesh = decodeWithoutValidation();
+        mesh.checkIntegrity();
+        return mesh;
+    }
+
+    public Mesh decodeWithoutValidation() throws IOException, BadFormatException, InvalidDataException
     {
         if (decoded) {
             throw new RuntimeException("Ctm File got already decoded");
@@ -78,9 +85,6 @@ public class CtmFileReader
         if (m == null) {
             throw new IOException("No sutible decoder found for Mesh of compression type: " + unpack(methodTag) + ", version " + formatVersion);
         }
-
-        // Check mesh integrity
-        m.checkIntegrity();
 
         return m;
     }

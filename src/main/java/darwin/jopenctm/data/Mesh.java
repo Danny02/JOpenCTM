@@ -18,7 +18,9 @@
  */
 package darwin.jopenctm.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import darwin.jopenctm.errorhandling.InvalidDataException;
 
@@ -94,41 +96,50 @@ public class Mesh {
     }
 
     public void checkIntegrity() throws InvalidDataException {
+        List<String> errors = validate();
+        if (!errors.isEmpty()){
+            StringBuilder sb = new StringBuilder("The model is not valid:");
+            for (String e : errors) {
+                sb.append("\n\t- ").append(e);
+            }
+            throw new InvalidDataException(sb.toString());
+        }
+    }
+
+    public List<String> validate() {
+        List<String> errors = new ArrayList<>();
 
         // Check that we have all the mandatory data
-        if (vertices == null || indices == null || vertices.length < 1
-            || getTriangleCount() < 1) {
-            throw new InvalidDataException("The vertice or indice array is NULL"
-                                           + " or empty!");
+        if (vertices == null || indices == null || vertices.length < 1 || getTriangleCount() < 1) {
+            errors.add("The vertice or indice array is NULL or empty!");
         }
 
         if (indices.length % 3 != 0) {
-            throw new InvalidDataException("The indices array size is not a multiple of three!");
+            errors.add("The indices array size is not a multiple of three!");
         }
 
         if (vertices.length % CTM_POSITION_ELEMENT_COUNT != 0) {
-            throw new InvalidDataException("The vertex array size is not a multiple of CTM_POSITION_ELEMENT_COUNT!");
+            errors.add("The vertex array size is not a multiple of CTM_POSITION_ELEMENT_COUNT!");
         }
 
         if (normals != null && normals.length % CTM_NORMAL_ELEMENT_COUNT != 0) {
-            throw new InvalidDataException("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT!");
+            errors.add("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT!");
         }
         if (normals != null && normals.length / CTM_NORMAL_ELEMENT_COUNT != getVertexCount()) {
-            throw new InvalidDataException("There aren't the same number of normals as vertices");
+            errors.add("There aren't the same number of normals as vertices");
         }
 
         // Check that all indices are within range
         for (int ind : indices) {
             if (ind >= getVertexCount()) {
-                throw new InvalidDataException("One element of the indices array "
-                                               + "points to a none existing vertex(id: " + ind + ")");
+                errors.add("One element of the indices array points to a none existing vertex(id: " + ind + ")");
             }
         }
 
         // Check that all vertices are finite (non-NaN, non-inf)
         for (float v : vertices) {
             if (isNotFinite(v)) {
-                throw new InvalidDataException("One of the vertices values is not finite!");
+                errors.add("One of the vertices values is not finite!");
             }
         }
 
@@ -136,7 +147,7 @@ public class Mesh {
         if (normals != null) {
             for (float n : normals) {
                 if (isNotFinite(n)) {
-                    throw new InvalidDataException("One of the normal values is not finite!");
+                    errors.add("One of the normal values is not finite!");
                 }
             }
         }
@@ -145,15 +156,15 @@ public class Mesh {
         for (AttributeData map : texcoordinates) {
             for (float v : map.values) {
                 if (isNotFinite(v)) {
-                    throw new InvalidDataException("One of the texcoord values is not finite!");
+                    errors.add("One of the texcoord values is not finite!");
                 }
             }
 
             if (map.values.length % CTM_UV_ELEMENT_COUNT != 0) {
-                throw new InvalidDataException("The uv values size is not a multiple of CTM_UV_ELEMENT_COUNT!");
+                errors.add("The uv values size is not a multiple of CTM_UV_ELEMENT_COUNT!");
             }
             if (map.values.length / CTM_UV_ELEMENT_COUNT != getVertexCount()) {
-                throw new InvalidDataException("There aren't the same number of uv values as vertices");
+                errors.add("There aren't the same number of uv values as vertices");
             }
         }
 
@@ -161,17 +172,19 @@ public class Mesh {
         for (AttributeData map : attributes) {
             for (float v : map.values) {
                 if (isNotFinite(v)) {
-                    throw new InvalidDataException("One of the attribute values is not finite!");
+                    errors.add("One of the attribute values is not finite!");
                 }
             }
 
             if (map.values.length % CTM_ATTR_ELEMENT_COUNT != 0) {
-                throw new InvalidDataException("The generic attribute values size is not a multiple of CTM_ATTR_ELEMENT_COUNT!");
+                errors.add("The generic attribute values size is not a multiple of CTM_ATTR_ELEMENT_COUNT!");
             }
             if (map.values.length / CTM_ATTR_ELEMENT_COUNT != getVertexCount()) {
-                throw new InvalidDataException("There aren't the same number of attribute values as vertices");
+                errors.add("There aren't the same number of attribute values as vertices");
             }
         }
+
+        return errors;
     }
 
     private boolean isNotFinite(float value) {
