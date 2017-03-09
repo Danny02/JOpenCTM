@@ -1,0 +1,22 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v3.1.187496374)
+
+newmtl Material-cesium_air
+Kd 0.6 0.6 0.6
+Ka 0.1 0.1 0.1
+Ks 0.2 0.2 0.2
+Ke 0 0 0
+d 1
+Ns 256
+illum 2
+map_Kd 0_Cesium_Air.png
+
+newmtl Material-prop
+Kd 0.6 0.6 0.6
+Ka 0.1 0.1 0.1
+Ks 0.2 0.2 0.2
+Ke 0 0 0
+d 1
+Ns 256
+illum 2
+map_Kd 1_Cesium_Air_Prop.png
