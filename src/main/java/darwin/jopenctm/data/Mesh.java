@@ -18,14 +18,13 @@
  */
 package darwin.jopenctm.data;
 
+import darwin.jopenctm.errorhandling.InvalidDataException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import darwin.jopenctm.errorhandling.InvalidDataException;
-
 /**
- *
  * @author daniel
  */
 public class Mesh {
@@ -97,7 +96,7 @@ public class Mesh {
 
     public void checkIntegrity() throws InvalidDataException {
         List<String> errors = validate();
-        if (!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             StringBuilder sb = new StringBuilder("The model is not valid:");
             for (String e : errors) {
                 sb.append("\n\t- ").append(e);
@@ -110,77 +109,94 @@ public class Mesh {
         List<String> errors = new ArrayList<>();
 
         // Check that we have all the mandatory data
-        if (vertices == null || indices == null || vertices.length < 1 || getTriangleCount() < 1) {
-            errors.add("The vertice or indice array is NULL or empty!");
+        if (vertices == null || vertices.length < 1) {
+            errors.add("The vertex array is NULL or empty!");
+        }
+        if (indices == null || getTriangleCount() < 1) {
+            errors.add("The index array does not describe a single triangle!" +
+                    (indices != null ? " - " + Arrays.toString(indices) : ""));
         }
 
         if (indices.length % 3 != 0) {
-            errors.add("The indices array size is not a multiple of three!");
+            errors.add("The indices array size is not a multiple of three! - " + indices.length);
         }
 
         if (vertices.length % CTM_POSITION_ELEMENT_COUNT != 0) {
-            errors.add("The vertex array size is not a multiple of CTM_POSITION_ELEMENT_COUNT!");
+            errors.add("The vertex array size is not a multiple of CTM_POSITION_ELEMENT_COUNT("
+                    + CTM_POSITION_ELEMENT_COUNT + ")! - " + vertices.length);
         }
 
         if (normals != null && normals.length % CTM_NORMAL_ELEMENT_COUNT != 0) {
-            errors.add("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT!");
+            errors.add("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT(" +
+                    CTM_NORMAL_ELEMENT_COUNT + ")! - " + normals.length);
         }
-        if (normals != null && normals.length / CTM_NORMAL_ELEMENT_COUNT != getVertexCount()) {
-            errors.add("There aren't the same number of normals as vertices");
+
+        int nCount = normals.length / CTM_NORMAL_ELEMENT_COUNT;
+        if (normals != null && nCount != getVertexCount()) {
+            errors.add("There aren't the same number of normals as vertices! - n:" + nCount + " v:" + getVertexCount());
         }
 
         // Check that all indices are within range
-        for (int ind : indices) {
-            if (ind >= getVertexCount()) {
-                errors.add("One element of the indices array points to a none existing vertex(id: " + ind + ")");
+        for (int i = 0; i < indices.length; i++) {
+            if (indices[i] >= getVertexCount()) {
+                errors.add("element(" + i + ") of the indices array points to a none existing vertex(id: " +
+                        indices[i] + ")");
             }
         }
 
         // Check that all vertices are finite (non-NaN, non-inf)
-        for (float v : vertices) {
-            if (isNotFinite(v)) {
-                errors.add("One of the vertices values is not finite!");
+        for (int i = 0; i < vertices.length; i++) {
+            if (isNotFinite(vertices[i])) {
+                errors.add("vertex value (" + i + ": " + vertices[i] + ") is not finite!");
             }
         }
 
         // Check that all normals are finite (non-NaN, non-inf)
         if (normals != null) {
-            for (float n : normals) {
-                if (isNotFinite(n)) {
-                    errors.add("One of the normal values is not finite!");
+            for (int i = 0; i < normals.length; i++) {
+                if (isNotFinite(normals[i])) {
+                    errors.add("normal value (" + i + ": " + normals[i] + ") is not finite!");
                 }
             }
         }
 
         // Check that all UV maps are finite (non-NaN, non-inf)
-        for (AttributeData map : texcoordinates) {
-            for (float v : map.values) {
-                if (isNotFinite(v)) {
-                    errors.add("One of the texcoord values is not finite!");
+        for (int i = 0; i < texcoordinates.length; i++) {
+            AttributeData map = texcoordinates[i];
+            for (int j = 0; j < map.values.length; j++) {
+                if (isNotFinite(map.values[j])) {
+                    errors.add("texcoord(" + i + ") value (" + j + ": " + map.values[j] + ") is not finite!");
                 }
             }
 
             if (map.values.length % CTM_UV_ELEMENT_COUNT != 0) {
-                errors.add("The uv values size is not a multiple of CTM_UV_ELEMENT_COUNT!");
+                errors.add("The uv(" + i + ") values size is not a multiple of CTM_UV_ELEMENT_COUNT(" +
+                        CTM_UV_ELEMENT_COUNT + ")! - " + map.values.length);
             }
-            if (map.values.length / CTM_UV_ELEMENT_COUNT != getVertexCount()) {
-                errors.add("There aren't the same number of uv values as vertices");
+            int uvCount = map.values.length / CTM_UV_ELEMENT_COUNT;
+            if (uvCount != getVertexCount()) {
+                errors.add("There aren't the same number of uv(" + i + ") values as vertices! - n:"
+                        + uvCount + " v:" + getVertexCount());
             }
         }
 
         // Check that all attribute maps are finite (non-NaN, non-inf)
-        for (AttributeData map : attributes) {
-            for (float v : map.values) {
-                if (isNotFinite(v)) {
-                    errors.add("One of the attribute values is not finite!");
+        for (int i = 0; i < attributes.length; i++) {
+            AttributeData map = attributes[i];
+            for (int j = 0; j < map.values.length; j++) {
+                if (isNotFinite(map.values[j])) {
+                    errors.add("attribute(" + i + ") value (" + j + ": " + map.values[j] + ") is not finite!");
                 }
             }
 
             if (map.values.length % CTM_ATTR_ELEMENT_COUNT != 0) {
-                errors.add("The generic attribute values size is not a multiple of CTM_ATTR_ELEMENT_COUNT!");
+                errors.add("The generic attribute(" + i + ") values size is not a multiple of CTM_ATTR_ELEMENT_COUNT(" +
+                        CTM_ATTR_ELEMENT_COUNT + ")! - " + map.values.length);
             }
-            if (map.values.length / CTM_ATTR_ELEMENT_COUNT != getVertexCount()) {
-                errors.add("There aren't the same number of attribute values as vertices");
+            int atCount = map.values.length / CTM_ATTR_ELEMENT_COUNT;
+            if (atCount != getVertexCount()) {
+                errors.add("There aren't the same number of attribute(" + i + ") values as vertices! - n:"
+                        + atCount + " v:" + getVertexCount());
             }
         }
 
