@@ -21,6 +21,7 @@ package darwin.jopenctm.compression;
 import java.util.Arrays;
 
 import darwin.jopenctm.data.Grid;
+import darwin.jopenctm.data.Vec3f;
 
 import static darwin.jopenctm.data.Mesh.*;
 import static java.lang.Math.sqrt;
@@ -76,8 +77,8 @@ public class CommonAlgorithms {
     public static float[] gridIdxToPoint(Grid grid, int idx) {
         int[] gridIdx = new int[3];
 
-        int ydiv = grid.getDivision()[0];
-        int zdiv = ydiv * grid.getDivision()[1];
+        int ydiv = grid.getDivision().getX();
+        int zdiv = ydiv * grid.getDivision().getY();
 
         gridIdx[2] = idx / zdiv;
         idx -= gridIdx[2] * zdiv;
@@ -85,11 +86,12 @@ public class CommonAlgorithms {
         idx -= gridIdx[1] * ydiv;
         gridIdx[0] = idx;
 
-        float[] size = grid.getSize();
-        float[] point = new float[3];
-        for (int i = 0; i < 3; ++i) {
-            point[i] = gridIdx[i] * size[i] + grid.getMin()[i];
-        }
+        Vec3f size = grid.getSize();
+        float[] point = {
+                gridIdx[0] * size.getX() + grid.getMin().getX(),
+                gridIdx[1] * size.getY() + grid.getMin().getY(),
+                gridIdx[2] * size.getZ() + grid.getMin().getZ()
+        };
         return point;
     }
 

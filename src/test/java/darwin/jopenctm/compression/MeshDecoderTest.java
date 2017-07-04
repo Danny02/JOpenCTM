@@ -63,8 +63,7 @@ public class MeshDecoderTest {
                 })
             };
 
-            mesh = new Mesh(vertices, normals, indices,
-                             uv, new AttributeData[0]);
+            mesh = new Mesh(vertices, normals, indices, uv, new AttributeData[0]);
             mesh.checkIntegrity();
         }
     }
@@ -78,7 +77,7 @@ public class MeshDecoderTest {
         enc.rearrangeTriangles(ind);
         enc.makeIndexDeltas(ind);
 
-        MG2Decoder dec = new MG2Decoder();
+        MG1Decoder dec = new MG1Decoder();
         dec.restoreIndices(ind.length / 3, ind);
 
         assertArrayEquals(ind, mesh.indices);

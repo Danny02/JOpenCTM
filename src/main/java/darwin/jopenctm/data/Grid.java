@@ -23,7 +23,6 @@ import java.io.IOException;
 import darwin.jopenctm.io.*;
 
 /**
- *
  * @author daniel
  */
 public class Grid {
@@ -31,71 +30,73 @@ public class Grid {
     /**
      * Axis-aligned bounding box for the grid
      */
-    private final float[] min, max;
+    private final Vec3f min, max;
     /**
      * How many divisions per axis (minimum 1).
      */
-    private final int[] division;
+    private final Vec3i division;
 
     public static Grid fromStream(CtmInputStream in) throws IOException {
-        return new Grid(in.readLittleFloatArray(3),
-                        in.readLittleFloatArray(3),
-                        in.readLittleIntArray(3));
+        return new Grid(Vec3f.read(in), Vec3f.read(in), Vec3i.read(in));
     }
 
-    public Grid(float[] min, float[] max, int[] division) {
+    public Grid(Vec3f min, Vec3f max, Vec3i division) {
         this.min = min;
         this.max = max;
         this.division = division;
     }
 
     public void writeToStream(CtmOutputStream out) throws IOException {
-        out.writeLittleFloatArray(min);
-        out.writeLittleFloatArray(max);
-        out.writeLittleIntArray(division);
+        min.write(out);
+        max.write(out);
+        division.write(out);
     }
 
     public boolean checkIntegrity() {
-        if (min.length != 3) {
+        if (division.getX() < 1) {
             return false;
         }
-        if (max.length != 3) {
+        if (division.getY() < 1) {
             return false;
         }
-        if (division.length != 3) {
+        if (division.getZ() < 1) {
             return false;
         }
 
-        for (int d : division) {
-            if (d < 1) {
-                return false;
-            }
+        if (max.getX() < min.getX()) {
+            return false;
         }
-        for (int i = 0; i < 3; i++) {
-            if (max[i] < min[i]) {
-                return false;
-            }
+        if (max.getY() < min.getY()) {
+            return false;
         }
+        if (max.getZ() < min.getZ()) {
+            return false;
+        }
+
         return true;
     }
 
-    public float[] getMin() {
+    public Vec3f getMin() {
         return min;
     }
 
-    public float[] getMax() {
+    public Vec3f getMax() {
         return max;
     }
 
-    public int[] getDivision() {
+    public Vec3i getDivision() {
         return division;
     }
 
-    public float[] getSize() {
-        float[] size = new float[3];
-        for (int i = 0; i < 3; i++) {
-            size[i] = (max[i] - min[i]) / division[i];
-        }
-        return size;
+    public Vec3f getSize() {
+        return new Vec3f(
+                calcSize(max.getX(), min.getX(), division.getX()),
+                calcSize(max.getY(), min.getY(), division.getY()),
+                calcSize(max.getZ(), min.getZ(), division.getZ())
+        );
+    }
+
+    private float calcSize(float max, float min, int division) {
+        return (max - min) / division;
     }
 }

@@ -185,28 +185,31 @@ public class MG2Encoder extends MG1Encoder {
             division[2] = 4;
         }
 
-        return new Grid(min, max, division);
+        return new Grid(Vec3f.from(min), Vec3f.from(max), Vec3i.from(division));
     }
 
     /**
      * Convert a point to a grid index.
      *
      * @param grid grid definition
-     * @param point x,y,z coordinates of point
      * @return grid index of point
      */
-    private int pointToGridIdx(Grid grid, float... point) {
-        int[] idx = new int[3];
-        float[] size = grid.getSize();
+    private int pointToGridIdx(Grid grid, float x, float y, float z) {
+        Vec3f size = grid.getSize();
 
-        for (int i = 0; i < 3; ++i) {
-            idx[i] = (int) floor((point[i] - grid.getMin()[i]) / size[i]);
-            if (idx[i] >= grid.getDivision()[i]) {
-                idx[i] = grid.getDivision()[i] - 1;
-            }
+        int idx = calcIndex(x, size.getX(), grid.getMin().getX(), grid.getDivision().getX());
+        int idy = calcIndex(y, size.getY(), grid.getMin().getY(), grid.getDivision().getY());
+        int idz = calcIndex(z, size.getZ(), grid.getMin().getZ(), grid.getDivision().getZ());
+
+        return idx + grid.getDivision().getX() * (idy + grid.getDivision().getY() * idz);
+    }
+
+    private int calcIndex(float x, float size, float min, int division) {
+        int iidx = (int) floor((x - min) / size);
+        if(iidx >= division){
+            return division - 1;
         }
-
-        return idx[0] + grid.getDivision()[0] * (idx[1] + grid.getDivision()[1] * idx[2]);
+        return iidx;
     }
 
     public SortableVertex[] sortVertices(Grid grid, float[] v) {

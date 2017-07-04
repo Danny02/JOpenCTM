@@ -69,31 +69,6 @@ public class Mesh {
         return normals != null;
     }
 
-    public float getAverageEdgeLength() {
-        // Calculate the average edge length (Note: we actually sum up all the half-
-        // edges, so in a proper solid mesh all connected edges are counted twice)
-
-        float totalLength = 0;
-        int edgeCount = 0;
-
-        Mesh m = null; //TODO mesh zugriff
-        for (int i = 0; i < getTriangleCount(); ++i) {
-            int p1, p2;
-            p1 = indices[i * 3 + 2] * 3;
-            for (int j = 0; j < 3; ++j) {
-                p2 = indices[i * 3 + j] * 3;
-                float length = (vertices[p2] - vertices[p1]) * (vertices[p2] - vertices[p1]);
-                length += (vertices[p2 + 1] - vertices[p1 + 1]) * (vertices[p2 + 1] - vertices[p1 + 1]);
-                length += (vertices[p2 + 2] - vertices[p1 + 2]) * (vertices[p2 + 2] - vertices[p1 + 2]);
-                totalLength += Math.sqrt(length);
-                p1 = p2;
-                ++edgeCount;
-            }
-        }
-
-        return totalLength / edgeCount;
-    }
-
     public void checkIntegrity() throws InvalidDataException {
         List<String> errors = validate();
         if (!errors.isEmpty()) {
