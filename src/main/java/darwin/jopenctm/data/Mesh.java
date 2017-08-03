@@ -101,16 +101,6 @@ public class Mesh {
                     + CTM_POSITION_ELEMENT_COUNT + ")! - " + vertices.length);
         }
 
-        if (normals != null && normals.length % CTM_NORMAL_ELEMENT_COUNT != 0) {
-            errors.add("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT(" +
-                    CTM_NORMAL_ELEMENT_COUNT + ")! - " + normals.length);
-        }
-
-        int nCount = normals.length / CTM_NORMAL_ELEMENT_COUNT;
-        if (normals != null && nCount != getVertexCount()) {
-            errors.add("There aren't the same number of normals as vertices! - n:" + nCount + " v:" + getVertexCount());
-        }
-
         // Check that all indices are within range
         for (int i = 0; i < indices.length; i++) {
             if (indices[i] >= getVertexCount()) {
@@ -126,8 +116,18 @@ public class Mesh {
             }
         }
 
-        // Check that all normals are finite (non-NaN, non-inf)
-        if (normals != null) {
+        if (hasNormals()){
+            if (normals.length % CTM_NORMAL_ELEMENT_COUNT != 0) {
+                errors.add("The normal array size is not a multiple of CTM_NORMAL_ELEMENT_COUNT(" +
+                        CTM_NORMAL_ELEMENT_COUNT + ")! - " + normals.length);
+            }
+
+            int nCount = normals.length / CTM_NORMAL_ELEMENT_COUNT;
+            if (nCount != getVertexCount()) {
+                errors.add("There aren't the same number of normals as vertices! - n:" + nCount + " v:" + getVertexCount());
+            }
+
+            // Check that all normals are finite (non-NaN, non-inf)
             for (int i = 0; i < normals.length; i++) {
                 if (isNotFinite(normals[i])) {
                     errors.add("normal value (" + i + ": " + normals[i] + ") is not finite!");
