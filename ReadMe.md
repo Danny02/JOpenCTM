@@ -1,15 +1,25 @@
-JOpenCTM
-=========
-
+# JOpenCTM
 Java implementation of the OpenCTM file-format.
 This library is licensed under the LGPL 3.0 License.
+
+## Content
+* [Getting Started](#getting-started)
+* [Compression Formats](#compression-formats)
+  * [Raw](#raw)
+  * [MG1](#mg1)
+  * [MG2](#mg2)
+* [Usage](#usage)
+  * [Reading a OpenCTM file](#reading-a-openctm-file)
+  * [Writing a OpenCTM file](#writing-a-openctm-file)
+* [Tools and Integrations](#tools-and-integrations)
+* [Similiar Projects](#similiar-projects)
 
 ## Getting Started
 
         <dependency>
             <groupId>com.github.danny02</groupId>
             <artifactId>JOpenCTM</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.2</version>
         </dependency>
 ## Compression Formats
 ### Raw
