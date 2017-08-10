@@ -1,4 +1,4 @@
-# JOpenCTM
+# JOpenCTM [![Build Status](https://travis-ci.org/Danny02/JOpenCTM.svg?branch=develop)](https://travis-ci.org/Danny02/JOpenCTM)
 Java implementation of the OpenCTM file-format.
 This library is licensed under the LGPL 3.0 License.
 
@@ -15,7 +15,6 @@ This library is licensed under the LGPL 3.0 License.
 * [Similiar Projects](#similiar-projects)
 
 ## Getting Started
-
         <dependency>
             <groupId>com.github.danny02</groupId>
             <artifactId>JOpenCTM</artifactId>
